@@ -5,7 +5,6 @@ import Main from "../main/Main";
 const AppRouter = () => {
   return (
     <Router>
-      <Nav />
       <Routes>
         <Route path="/" element={<Main />} />
       </Routes>
