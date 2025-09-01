@@ -1,34 +1,29 @@
-# 🎵 Electron Music Player
+# 🤖 OzoneGPT - ChatGPT Clone
 
-A simple **desktop music player** built with **Electron.js, React, and Vite**.  
-It allows you to add folders, read song metadata, and play music locally on your PC.
+OzoneGPT is a **ChatGPT clone**.  
+It replicates the ChatGPT chat interface with a simple input bar, tooltips, and send/voice buttons.
 
 ---
 
-## 🚀 Features
-- 🎧 Play audio files directly from your computer  
-- 📂 Add folders & load your music library  
-- 📝 Display song metadata (title, artist, album, cover art if available)  
-- ⏱️ Show duration & current playback time  
-- ⏯️ Play / Pause controls  
-- 🔊 Volume control & progress bar with clamping (0–100%)  
-- ⚡ Built with **Electron + React + Vite** for fast and modern development  
+## ✨ Features
+- 💬 Chat interface similar to **ChatGPT**
+- 📝 Type and send prompts
+- 🎙️ Voice mode (mic ↔ send button switch)
+- 📎 Option to add files/photos (planned)
+- 🎨 Minimal UI with TailwindCSS
 
 ---
 
 ## 🛠️ Tech Stack
-- [Electron.js](https://www.electronjs.org/) – Desktop runtime  
-- [React](https://react.dev/) – UI  
-- [Vite](https://vitejs.dev/) – Build tool  
-- [TypeScript](https://www.typescriptlang.org/) – Type safety  
-- [Tailwind CSS](https://tailwindcss.com/) – Styling  
+- **Frontend:** React + Vite + TypeScript + TailwindCSS  
+- **AI Integration:** OpenAI API (planned)  
+- **Icons:** React Icons  
 
 ---
 
-## 📦 Installation
+## 🚀 Getting Started
 
-Clone the repo:
-
+### 1️⃣ Clone the repo
 ```bash
-git clone https://github.com/your-username/electron-music-player.git
-cd electron-music-player
+git clone https://github.com/your-username/ozonegpt.git
+cd ozonegpt
