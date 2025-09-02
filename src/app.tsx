@@ -4,7 +4,7 @@ import AppRouter from "./components/router/AppRouter";
 
 export default function App() {
   return (
-    <div className="flex flex-col h-screen font-custom text-[var(--foreground)]">
+    <div className="bg-[#232222] flex flex-col h-screen font-custom text-[var(--foreground)]">
       <Nav />
       <AppRouter />
       <Footer />

@@ -1,7 +1,7 @@
 
 const Footer = () => {
   return (
-    <div className="text-xs p-2 font-custom flex justify-center items-center text-white bg-[#232222]">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2  w-full text-xs p-1 font-custom flex justify-center items-center text-white ">
       By messaging you will experience how chatgpt clone works
     </div>
   );

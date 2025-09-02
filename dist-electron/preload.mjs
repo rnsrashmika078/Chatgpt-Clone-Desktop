@@ -19,8 +19,9 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   invoke(...args) {
     const [channel, ...omit] = args;
     return electron.ipcRenderer.invoke(channel, ...omit);
-  },
-  // You can expose other APTs you need here.
-  getMetadata: (filePath) => electron.ipcRenderer.invoke("get-metadata", filePath)
+  }
+});
+electron.contextBridge.exposeInMainWorld("chatgpt", {
+  ask: (prompt) => electron.ipcRenderer.invoke("ask-chatgpt", prompt)
 });
 console.log("preload loaded");
