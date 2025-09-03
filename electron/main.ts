@@ -50,7 +50,6 @@ ipcMain.handle("ask-chatgpt", async (_event, prompt) => {
   try {
     const res = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCi1lARM3secFtEiTrbz6uvjnkXbaaBBr0",
-      
       {
         method: "POST",
         headers: {
@@ -61,13 +60,36 @@ ipcMain.handle("ask-chatgpt", async (_event, prompt) => {
         }),
       }
     );
+
+    // Handle non-200 responses
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return {
+        error: true,
+        status: res.status,
+        message: errorData?.error?.message || "Request failed",
+      };
+    }
+
     const data = await res.json();
-    console.log(data);
 
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    return reply;
+
+    return {
+      error: false,
+      message: reply || "No reply received",
+    };
   } catch (error) {
-    console.log(error instanceof Error ? error.message : "Error here");
+    if (error instanceof Error) {
+      return {
+        error: true,
+        message: error.message,
+      };
+    }
+    return {
+      error: true,
+      message: "Unknown error occurred",
+    };
   }
 });
 

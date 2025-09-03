@@ -4,5 +4,6 @@ export interface UserMessage {
   id: string;
   from: From;
   message: string;
-  time: Date;
+  time?: Date;
+  loading?: boolean;
 }

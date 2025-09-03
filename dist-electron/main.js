@@ -33,7 +33,7 @@ function createWindow() {
   }
 }
 ipcMain.handle("ask-chatgpt", async (_event, prompt) => {
-  var _a, _b, _c, _d, _e;
+  var _a, _b, _c, _d, _e, _f;
   try {
     const res = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCi1lARM3secFtEiTrbz6uvjnkXbaaBBr0",
@@ -47,12 +47,31 @@ ipcMain.handle("ask-chatgpt", async (_event, prompt) => {
         })
       }
     );
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return {
+        error: true,
+        status: res.status,
+        message: ((_a = errorData == null ? void 0 : errorData.error) == null ? void 0 : _a.message) || "Request failed"
+      };
+    }
     const data = await res.json();
-    console.log(data);
-    const reply = (_e = (_d = (_c = (_b = (_a = data == null ? void 0 : data.candidates) == null ? void 0 : _a[0]) == null ? void 0 : _b.content) == null ? void 0 : _c.parts) == null ? void 0 : _d[0]) == null ? void 0 : _e.text;
-    return reply;
+    const reply = (_f = (_e = (_d = (_c = (_b = data == null ? void 0 : data.candidates) == null ? void 0 : _b[0]) == null ? void 0 : _c.content) == null ? void 0 : _d.parts) == null ? void 0 : _e[0]) == null ? void 0 : _f.text;
+    return {
+      error: false,
+      message: reply || "No reply received"
+    };
   } catch (error) {
-    console.log(error instanceof Error ? error.message : "Error here");
+    if (error instanceof Error) {
+      return {
+        error: true,
+        message: error.message
+      };
+    }
+    return {
+      error: true,
+      message: "Unknown error occurred"
+    };
   }
 });
 app.on("window-all-closed", () => {
