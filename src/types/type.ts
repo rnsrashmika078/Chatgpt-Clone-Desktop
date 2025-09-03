@@ -7,3 +7,9 @@ export interface UserMessage {
   time?: Date;
   loading?: boolean;
 }
+export interface AuthUser {
+  id: number;
+  name: string;
+  email: string;
+  token: string;
+}

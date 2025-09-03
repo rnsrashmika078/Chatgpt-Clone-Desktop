@@ -1,3 +1,5 @@
+import { AuthUser } from "./types/type";
+
 export {};
 
 declare global {
@@ -7,6 +9,10 @@ declare global {
     };
     chatgpt: {
       ask: (prompt: string) => Promise<string>;
+    };
+    auth: {
+      setAuthUser: (AuthUser: AuthUser) => void;
+      getAuthUser: () => Promise<AuthUser>;
     };
   }
 }

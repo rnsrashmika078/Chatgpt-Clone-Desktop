@@ -9,7 +9,7 @@ type ChatStore = {
   setUserMessages: (message: UserMessage) => void;
   setLoading: (isLoading: boolean) => void;
   setHeight: (currentHeight: number) => void;
-  setNotification: (notifier: string) => void;
+  setNotification: (notifier: string | null) => void;
   setUpdateMessage: (id: string, message: string) => void;
 };
 

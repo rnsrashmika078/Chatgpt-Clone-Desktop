@@ -1,35 +1,151 @@
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Button from "../common/Button";
+import { BsApple, BsGoogle, BsMicrosoft } from "react-icons/bs";
+import { useChatClone } from "@/zustand/store";
+import { useNavigate } from "react-router-dom";
+import { AuthUser } from "@/types/type";
 
 const Login = () => {
-  const [focus, setFocus] = useState<boolean>(false);
+  // data
+  type Credentials = {
+    email: string;
+    password: string;
+  };
+  const [credentials, setCredentials] = useState<Credentials>({
+    email: "",
+    password: "",
+  });
+  //
+  const height = useChatClone((store) => store.height);
+  const [focus, setFocus] = useState<{ btn: string; isFocused: boolean }>({
+    btn: "",
+    isFocused: false,
+  });
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const setNotification = useChatClone((store) => store.setNotification);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (emailRef.current?.contains(e.target as Node)) {
+        setFocus({ btn: "email", isFocused: true });
+      } else if (passwordRef.current?.contains(e.target as Node)) {
+        setFocus({ btn: "password", isFocused: true });
+      } else {
+        setFocus({ btn: "", isFocused: false });
+      }
+    };
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => window.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  const buttons = [
+    { name: "Google", icon: <BsGoogle size={20} /> },
+    { name: "Microsoft Account", icon: <BsMicrosoft size={20} /> },
+    // { name: "Apple", icon: <BsApple size={20} /> },
+    // { name: "phone", icon: <BsPhone size={20} /> },
+  ];
+  type Inputs = {
+    name: string;
+    placeholder: string;
+    ref: React.RefObject<HTMLInputElement>;
+  };
+  const inputFields: Inputs[] = [
+    { name: "email", placeholder: "Email address", ref: emailRef },
+    { name: "password", placeholder: "Password", ref: passwordRef },
+  ];
+  const handleLogin = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/login`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      });
+      const data = await res.json();
+      if (data) {
+        setNotification(data.message);
+        console.log("AUTH DATA", data.user_info.email);
+        const authUser: AuthUser = {
+          name: data.user_info.name,
+          email: data.user_info.email,
+          id: data.user_info.id,
+          token: data.token,
+        };
+        window.auth.setAuthUser(authUser);
+      }
+    } catch (error) {
+      // alert(error);
+    }
+  };
+
+  console.log(credentials);
   return (
-    <div className=" flex w-96  m-auto text-center flex-col h-screen justify-center items-center space-y-3">
+    <div
+      style={{ height }}
+      className={`flex w-1/2 sm:w-6/12 md:w-3/12 m-auto text-center flex-col justify-start items-center space-y-5 `}
+    >
       <h3 className="text-white text-2xl font-bold font-story">OzoneGPT</h3>
       <h1 className="text-white font-bold text-4xl">Log in or sign up</h1>
       <p className="text-[#b1b1b1] ">
         You'll get smarter responses and can upload files,images, and more.
       </p>
-      <div className="relative">
-        <input
-          onFocus={() => setFocus((prev) => !prev)}
-          className="text-white w-80 pl-8 p-4 rounded-full border focus:placeholder-transparent bg-[#232222]  mt-2 border-gray-500 placeholder:text-[#ffffff] focus:outline-none ring-0 focus:ring-1 focus:ring-blue-300 transition-all"
-          placeholder="Email address"
-        />
-        <motion.p
-          animate={{
-            y: focus ? 2 : 26,
-            opacity: focus ? 1 : 0, // hide when not focused
-          }}
-          transition={{ duration: 0.1, ease: "easeInOut" }}
-          className="z-0 select-none text-sm absolute text-white px-2 bg-[#232222]  w-fit top-0 left-6"
-        >
-          Email address
-        </motion.p>
-      </div>
+      {inputFields.map((field: Inputs) => (
+        <div className="relative w-full">
+          <input
+            ref={field.ref}
+            name={field.placeholder}
+            // @ts-expect-error: this is know error
+            value={credentials[field.name]}
+            onChange={(e) =>
+              setCredentials((prev) => ({
+                ...prev,
+                [field.name]: e.target.value,
+              }))
+            }
+            className="text-white w-full pl-8 p-3 z-0 rounded-full border focus:placeholder-transparent bg-[#232222]  mt-2 border-gray-500 placeholder:text-[#ffffff] focus:outline-none ring-0 focus:ring-1 focus:ring-blue-300 transition-all"
+            placeholder={field.placeholder}
+          />
+          <motion.p
+            animate={{
+              y: focus.btn === field.name && focus.isFocused ? 2 : 26,
+              opacity: focus.btn === field.name && focus.isFocused ? 1 : 0,
+            }}
+            transition={{ duration: 0.1, ease: "easeInOut" }}
+            className="pointer-events-none z-0 select-none text-sm absolute text-white px-2 bg-[#232222]  w-fit -top-1 left-6"
+          >
+            {field.placeholder}
+          </motion.p>
+        </div>
+      ))}
 
-      <button>Continue</button>
-      <span>OR</span>
+      <Button
+        name="Continue"
+        className="w-full"
+        variant="dark"
+        radius="full"
+        size="lg"
+        onClick={() => handleLogin()}
+      />
+      <div className=" relative  border-b border-gray-400 w-full">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white bg-[#232222] px-2">
+          OR
+        </div>
+      </div>
+      {buttons.map((btn) => (
+        <Button
+          name={`Continue with ${btn.name}`}
+          className="w-full"
+          variant="light"
+          radius="full"
+          size="lg"
+          textAlign="left"
+        >
+          {btn.icon}
+        </Button>
+      ))}
     </div>
   );
 };

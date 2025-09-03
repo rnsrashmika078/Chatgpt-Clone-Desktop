@@ -1,3 +1,4 @@
+import { AuthUser } from "@/types/type";
 import { ipcRenderer, contextBridge } from "electron";
 
 // --------- Expose some API to the Renderer process ---------
@@ -25,4 +26,10 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 contextBridge.exposeInMainWorld("chatgpt", {
   ask: (prompt: string) => ipcRenderer.invoke("ask-chatgpt", prompt),
 });
+contextBridge.exposeInMainWorld("auth", {
+  setAuthUser: (authUser: AuthUser) =>
+    ipcRenderer.send("save-auth-user", authUser),
+  getAuthUser: () => ipcRenderer.invoke("get-auth-user"),
+});
+
 console.log("preload loaded");

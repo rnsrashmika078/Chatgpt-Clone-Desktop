@@ -2,47 +2,46 @@
 import React, { useEffect, useState } from "react";
 import { CiSquareRemove } from "react-icons/ci";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { useChatClone } from "@/zustand/store";
 
 const Sonner = () => {
-  const dispatch = useDispatch<ReduxDispatch>();
   const [show, setShow] = useState(true);
-  const newMessage = useSelector(
-    (store: ReduxtState) => store.notify.simpleMessage
-  );
+  const notification = useChatClone((store) => store.notifier);
+  const setNotification = useChatClone((store) => store.setNotification);
+
   useEffect(() => {
-    if (!newMessage) return;
+    if (!notification) return;
     setShow(true);
     const timer = setTimeout(() => setShow(false), 3000);
 
     return () => {
-      dispatch(setSimpleNotification(null));
+      setNotification(null);
       clearTimeout(timer);
     };
-  }, [newMessage]);
+  }, [notification]);
 
   const handleVisibility = (visible: boolean) => {
-    dispatch(setSimpleNotification(null));
+    setNotification(null);
     setShow(visible);
   };
 
   return (
-    <div>
+    <div className="fixed top-0 left-0 w-full flex justify-center  z-[9999]" >
       <AnimatePresence>
-        {newMessage?.message && newMessage.message.length > 0 && show && (
+        {notification && notification.length > 0 && show && (
           <motion.div
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 50, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="w-96 fixed top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-[var(--input-border)] p-3 rounded-xl bg-[var(--sonner-background)] z-[9999]"
+            className="w-96 fixed top-0  -translate-x-1/2 border shadow-md border-[#303030] p-3 rounded-xl bg-[#383838]"
           >
             <>
-              <div className="flex justify-between">
-                <div>
-                  <h1>{newMessage.message.split(".")[0]}</h1>
-                  <span className="text-[var(--secondary-color)] ">
-                    {newMessage.message.split(".")[1]}
+              <div className="flex justify-between items-center">
+                <div className="text-[#d0d0d0] ">
+                  <h1>{notification.split(".")[0]}</h1>
+                  <span className="">
+                    {notification.split(".")[1]}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">

@@ -3,17 +3,23 @@ import Main from "../main/Main";
 import Login from "../signs/Login";
 import Nav from "../Nav/Nav";
 import Footer from "../footer/Footer";
+import Signin from "../signs/Signin";
+import Sonner from "../Sonner/Sonner";
 
 const AppRouter = () => {
   return (
-    <Router>
-      <Nav />
-      <Routes>
-        <Route path="/" element={<Main />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
-      <Footer />
-    </Router>
+    <div className=" custom-scrollbar">
+      <Router>
+        <Sonner />
+        <Nav />
+        <Routes>
+          <Route path="/" element={<Main />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signin" element={<Signin />} />
+        </Routes>
+        <Footer />
+      </Router>
+    </div>
   );
 };
 

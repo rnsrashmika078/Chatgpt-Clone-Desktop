@@ -72,6 +72,7 @@ const AskAI = () => {
       askFromAI();
     }
   };
+
   const error = "https://ai.google.dev/gemini-api/docs/rate-limits";
   return (
     <div className="fixed mb-5 bottom-0 left-0 right-0 z-40 flex flex-col items-center w-full  pb-4">
@@ -79,7 +80,7 @@ const AskAI = () => {
         <h1 className="text-3xl font-bold font-story mb-4">OzoneGPT</h1>
       )}
 
-      <div className="relative flex items-end w-11/12 sm:w-10/12 md:w-1/2 bg-[#313131] rounded-2xl shadow-xl">
+      <div className="relative flex items-end w-8/12 bg-[#313131] rounded-2xl shadow-xl">
         {/* Add Button */}
         <div className="absolute bottom-2 left-2 flex items-center">
           <span

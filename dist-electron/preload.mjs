@@ -24,4 +24,8 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
 electron.contextBridge.exposeInMainWorld("chatgpt", {
   ask: (prompt) => electron.ipcRenderer.invoke("ask-chatgpt", prompt)
 });
+electron.contextBridge.exposeInMainWorld("auth", {
+  setAuthUser: (authUser) => electron.ipcRenderer.send("save-auth-user", authUser),
+  getAuthUser: () => electron.ipcRenderer.invoke("get-auth-user")
+});
 console.log("preload loaded");
