@@ -1,9 +1,10 @@
 import { create } from "zustand";
-import { UserMessage } from "@/types/type";
+import { AuthUser, UserMessage } from "@/types/type";
 
 type ChatStore = {
   height: number;
   loading: boolean;
+  authUser: AuthUser | null;
   userMessages: UserMessage[] | null;
   notifier: String | null;
   setUserMessages: (message: UserMessage) => void;
@@ -11,6 +12,7 @@ type ChatStore = {
   setHeight: (currentHeight: number) => void;
   setNotification: (notifier: string | null) => void;
   setUpdateMessage: (id: string, message: string) => void;
+  setAuthUser: (authData: AuthUser) => void;
 };
 
 type ActiveTabStore = {
@@ -21,6 +23,7 @@ type ActiveTabStore = {
 export const useChatClone = create<ChatStore>((set) => ({
   userMessages: null,
   notifier: null,
+  authUser: null,
   loading: false,
   height: window.innerHeight,
   setUserMessages: (message) =>
@@ -30,6 +33,7 @@ export const useChatClone = create<ChatStore>((set) => ({
   setHeight: (currentHeight) => set(() => ({ height: currentHeight })),
   setNotification: (notifier) => set(() => ({ notifier })),
   setLoading: (isLoading) => set(() => ({ loading: isLoading })),
+  setAuthUser: (authData) => set(() => ({ authUser: authData })),
   setUpdateMessage: (id, message) =>
     set((state) => ({
       userMessages: state.userMessages?.map((msg) =>

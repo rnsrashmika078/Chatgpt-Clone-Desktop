@@ -5,21 +5,21 @@ import Nav from "../Nav/Nav";
 import Footer from "../footer/Footer";
 import Signin from "../signs/Signin";
 import Sonner from "../Sonner/Sonner";
+import MainTest from "../main/MainTest";
 
 const AppRouter = () => {
   return (
-    <div className=" custom-scrollbar">
-      <Router>
-        <Sonner />
-        <Nav />
-        <Routes>
-          <Route path="/" element={<Main />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signin" element={<Signin />} />
-        </Routes>
-        <Footer />
-      </Router>
-    </div>
+    // <div className=" custom-scrollbar">
+    <Router>
+      <Sonner />
+      {/* <Nav /> */}
+      <Routes>
+        <Route path="/" element={<Main />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signin" element={<Signin />} />
+      </Routes>
+    </Router>
+    // </div>
   );
 };
 

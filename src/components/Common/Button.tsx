@@ -5,6 +5,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   radius?: "xs" | "md" | "xl" | "full";
   children?: React.ReactNode;
   textAlign?: "left" | "right" | "center";
+  border?: boolean;
 }
 
 const Button = ({
@@ -14,15 +15,17 @@ const Button = ({
   radius = "xs",
   className,
   textAlign = "center",
+  border = true,
   children,
   ...props
 }: ButtonProps) => {
   const variants = {
     default:
       "bg-blue-600 text-white hover:bg-blue-700 hover:cursor-pointer hover:shadow-md transition",
-    light: "text-xs bg-white  font-semibold hover:bg-[#dedede] ",
-    transparent:
-      "text-white text-xs bg-transparent font-semibold border border-gray-400 ",
+    light: "text-xs bg-white  font-semibold hover:bg-[#dedede] text-black ",
+    transparent: `text-white text-xs bg-transparent font-semibold ${
+      border ? "border border-gray-400" : ""
+    } `,
     dark: "text-white text-xs bg-black  font-semibold hover:bg-[#141414]",
   };
 

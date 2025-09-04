@@ -75,7 +75,7 @@ const AskAI = () => {
 
   const error = "https://ai.google.dev/gemini-api/docs/rate-limits";
   return (
-    <div className="fixed mb-5 bottom-0 left-0 right-0 z-40 flex flex-col items-center w-full  pb-4">
+    <div className=" mb-5 bottom-0 left-0 right-0 z-40 flex flex-col items-center w-full  pb-4">
       {!(userMessages && userMessages.length > 0) && (
         <h1 className="text-3xl font-bold font-story mb-4">OzoneGPT</h1>
       )}

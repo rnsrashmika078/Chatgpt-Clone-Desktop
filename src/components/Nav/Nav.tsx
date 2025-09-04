@@ -5,15 +5,19 @@ import BGImage from "@/assets/sample (3).jpg";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import Button from "../common/Button";
+import { GiTemporaryShield } from "react-icons/gi";
+import { PiChatCircleSlash } from "react-icons/pi";
+import ToolTip from "../common/ToolTip";
 
 export default function Nav() {
   const userMessages = useChatClone((store) => store.userMessages);
+  const authUser = useChatClone((store) => store.authUser);
   const [visible, setVisible] = useState<boolean>(false);
   const buttonRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const path = window.location.pathname;
   return (
-    <div className="sticky top-0 z-[9998]">
+    <div className="sticky top-0 z-[9998] w-full">
       {/* use color */}
       <nav className="flex justify-between bg-[#232222]  p-5">
         {/* <Link to="/">Home</Link> | <Link to="/about">About</Link> */}
@@ -43,30 +47,45 @@ export default function Nav() {
           {visible && <Card setVisible={setVisible} buttonRef={buttonRef} />}
         </div>
         <div className="flex gap-2 justify-center items-center">
-          {/* login button */}
-          <Button
-            name="Log in"
-            size="xs"
-            radius="full"
-            variant="light"
-            onClick={() => {
-              navigate("/login");
-              setVisible(false);
-            }}
-          />
-
-          {/* sign in button */}
-          <Button
-            name="Sign up for free"
-            size="xs"
-            radius="full"
-            variant="transparent"
-            onClick={() => {
-              navigate("/signin");
-              setVisible(false);
-            }}
-          />
-          <BsQuestionCircle color="white" strokeWidth={0.5} />
+          {authUser?.token ? (
+            <Button
+              border={false}
+              size="xs"
+              radius="full"
+              variant="transparent"
+              onClick={() => {
+                // navigate("/login");
+                setVisible(false);
+              }}
+            >
+              <ToolTip tip="Start Tempory Chat" />
+              <PiChatCircleSlash size={25} />
+            </Button>
+          ) : (
+            <>
+              <Button
+                name="Log in"
+                size="xs"
+                radius="full"
+                variant="light"
+                onClick={() => {
+                  navigate("/login");
+                  setVisible(false);
+                }}
+              />
+              <Button
+                name="Sign up for free"
+                size="xs"
+                radius="full"
+                variant="transparent"
+                onClick={() => {
+                  navigate("/signin");
+                  setVisible(false);
+                }}
+              />
+              <BsQuestionCircle color="white" strokeWidth={0.5} />
+            </>
+          )}
         </div>
       </nav>
     </div>
@@ -119,7 +138,6 @@ const Card = ({ setVisible, buttonRef }: CardProps) => {
           logging in.
         </p>
         <div className="flex gap-2 justify-center items-center mt-4">
-          {/* login button */}
           <Button
             name="Log in"
             size="xs"
@@ -130,6 +148,7 @@ const Card = ({ setVisible, buttonRef }: CardProps) => {
               setVisible(false);
             }}
           />
+          {/* login button */}
           <Button
             name="Sign up for free"
             size="xs"
