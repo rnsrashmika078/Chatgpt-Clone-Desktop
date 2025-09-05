@@ -4,6 +4,7 @@ import Button from "../common/Button";
 import { BsApple, BsGoogle, BsMicrosoft } from "react-icons/bs";
 import { useChatClone } from "@/zustand/store";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/supabase/Supabase";
 
 const Signin = () => {
   const setNotification = useChatClone((store) => store.setNotification);
@@ -63,25 +64,23 @@ const Signin = () => {
   const navigate = useNavigate();
 
   const handleSignIn = async () => {
-    try {
-      const res = await fetch(`http://localhost:8000/api/register`, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-      const data = await res.json();
-      if (data) {
-        setNotification(data.message);
-        navigate("/login");
-      }
-    } catch (error) {
-      // alert(error);
+    const { data, error } = await supabase.auth.signUp({
+      email: credentials.email,
+      password: credentials.password,
+      options: {
+        emailRedirectTo: "http://localhost:5173/confirmationSuccess",
+        // or your deployed URL: https://myapp.com/login
+      },
+    });
+
+    if (error) {
+      setNotification(`Sign up error:, ${error.message}`);
+    } else {
+      console.log("Check your email for confirmation link", data);
+      navigate("/confirmation");
     }
   };
 
-  console.log(credentials);
   return (
     <div
       style={{ height }}
@@ -129,6 +128,7 @@ const Signin = () => {
         size="lg"
         onClick={() => handleSignIn()}
       />
+
       <div className=" relative  border-b border-gray-400 w-full">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white bg-[#232222] px-2">
           OR

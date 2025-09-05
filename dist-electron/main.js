@@ -16283,6 +16283,7 @@ ipcMain$1.handle("ask-chatgpt", async (_event, prompt) => {
       };
     }
     const data = await res.json();
+    console.log(data);
     const reply = (_f = (_e = (_d = (_c = (_b = data == null ? void 0 : data.candidates) == null ? void 0 : _b[0]) == null ? void 0 : _c.content) == null ? void 0 : _d.parts) == null ? void 0 : _e[0]) == null ? void 0 : _f.text;
     return {
       error: false,

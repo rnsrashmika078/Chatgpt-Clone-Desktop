@@ -5,6 +5,8 @@ import { BsApple, BsGoogle, BsMicrosoft } from "react-icons/bs";
 import { useChatClone } from "@/zustand/store";
 import { useNavigate } from "react-router-dom";
 import { AuthUser } from "@/types/type";
+import Nav from "../Nav/Nav";
+import { supabase } from "@/supabase/Supabase";
 
 const Login = () => {
   // data
@@ -16,7 +18,8 @@ const Login = () => {
     email: "",
     password: "",
   });
-  //
+  const notifier = useChatClone((store) => store.notifier);
+
   const height = useChatClone((store) => store.height);
   const [focus, setFocus] = useState<{ btn: string; isFocused: boolean }>({
     btn: "",
@@ -56,32 +59,18 @@ const Login = () => {
     { name: "password", placeholder: "Password", ref: passwordRef },
   ];
   const handleLogin = async () => {
-    try {
-      const res = await fetch(`http://localhost:8000/api/login`, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-      const data = await res.json();
-      if (data) {
-        setNotification(data.message);
-        console.log("AUTH DATA", data.user_info.email);
-        const authUser: AuthUser = {
-          name: data.user_info.name,
-          email: data.user_info.email,
-          id: data.user_info.id,
-          token: data.token,
-        };
-        window.auth.setAuthUser(authUser);
-      }
-    } catch (error) {
-      // alert(error);
+    setNotification("");
+    const { error } = await supabase.auth.signInWithPassword({
+      email: credentials.email,
+      password: credentials.password,
+    });
+    if (error) setNotification(`${error.message}`);
+    else {
+      setNotification(`Successfully Logged in!`);
+      navigate("/");
     }
   };
 
-  console.log(credentials);
   return (
     <div
       style={{ height }}
@@ -92,8 +81,9 @@ const Login = () => {
       <p className="text-[#b1b1b1] ">
         You'll get smarter responses and can upload files,images, and more.
       </p>
-      {inputFields.map((field: Inputs) => (
-        <div className="relative w-full">
+      {inputFields.map((field: Inputs, index: number) => (
+        // @ts-expect-error:Key unidentified error
+        <div className="relative w-full" key={index}>
           <input
             ref={field.ref}
             name={field.placeholder}
@@ -120,7 +110,6 @@ const Login = () => {
           </motion.p>
         </div>
       ))}
-
       <Button
         name="Continue"
         className="w-full"
@@ -128,14 +117,34 @@ const Login = () => {
         radius="full"
         size="lg"
         onClick={() => handleLogin()}
-      />
+      />{" "}
+      {notifier && (
+        <div className="flex items-center gap-2 text-sm text-red-500 font-semibold bg-red-50 border border-red-300 rounded-md px-4 py-2 mt-2 shadow-sm">
+          <svg
+            className="w-4 h-4 text-red-500"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v2m0 4h.01M12 4.5c-4.1 0-7.5 3.4-7.5 7.5s3.4 7.5 7.5 7.5 7.5-3.4 7.5-7.5S16.1 4.5 12 4.5z"
+            />
+          </svg>
+          <p>{notifier}</p>
+        </div>
+      )}
       <div className=" relative  border-b border-gray-400 w-full">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white bg-[#232222] px-2">
           OR
         </div>
       </div>
-      {buttons.map((btn) => (
+      {buttons.map((btn, index) => (
         <Button
+          // @ts-expect-error:Key unidentified error
+          key={index}
           name={`Continue with ${btn.name}`}
           className="w-full"
           variant="light"

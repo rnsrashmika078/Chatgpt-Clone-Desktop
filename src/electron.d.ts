@@ -1,4 +1,4 @@
-import { AuthUser } from "./types/type";
+import { AuthUser, Reply } from "./types/type";
 
 export {};
 
@@ -8,7 +8,7 @@ declare global {
       getMetadata: (filePath: string) => Promise<any>;
     };
     chatgpt: {
-      ask: (prompt: string) => Promise<string>;
+      ask: (prompt: string) => Promise<Reply>;
     };
     auth: {
       setAuthUser: (AuthUser: AuthUser) => void;

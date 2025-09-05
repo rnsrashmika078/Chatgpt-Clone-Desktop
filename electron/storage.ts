@@ -3,7 +3,7 @@ import { ipcMain } from "electron";
 import { AuthUser } from "@/types/type";
 
 const store = new Store();
-
+// store.clear();
 export function UserPreference() {
   ipcMain.on("save-auth-user", (_event, authData: AuthUser) => {
     store.set("authUser", authData);

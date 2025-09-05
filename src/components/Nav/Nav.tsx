@@ -5,7 +5,6 @@ import BGImage from "@/assets/sample (3).jpg";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import Button from "../common/Button";
-import { GiTemporaryShield } from "react-icons/gi";
 import { PiChatCircleSlash } from "react-icons/pi";
 import ToolTip from "../common/ToolTip";
 
@@ -16,6 +15,7 @@ export default function Nav() {
   const buttonRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const path = window.location.pathname;
+
   return (
     <div className="sticky top-0 z-[9998] w-full">
       {/* use color */}
@@ -46,8 +46,8 @@ export default function Nav() {
 
           {visible && <Card setVisible={setVisible} buttonRef={buttonRef} />}
         </div>
-        <div className="flex gap-2 justify-center items-center">
-          {authUser?.token ? (
+        <div className="flex gap-2 justify-center items-center ">
+          {authUser?.authenticated ? (
             <Button
               border={false}
               size="xs"
@@ -59,7 +59,10 @@ export default function Nav() {
               }}
             >
               <ToolTip tip="Start Tempory Chat" />
-              <PiChatCircleSlash size={25} />
+              <PiChatCircleSlash
+                size={40}
+                className="hover:bg-[#444444] rounded-md p-2"
+              />
             </Button>
           ) : (
             <>

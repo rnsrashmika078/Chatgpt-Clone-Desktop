@@ -75,6 +75,7 @@ ipcMain.handle("ask-chatgpt", async (_event, prompt) => {
 
     const data = await res.json();
 
+    console.log(data);
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     return {
