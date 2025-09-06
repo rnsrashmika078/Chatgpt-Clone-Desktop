@@ -73,9 +73,8 @@
     @apply bg-background text-foreground;
   }
 }
-
-/* @media (max-width: 20px) {
-    .small {
-        display: hidden;
-    }
-} */
+.custom-scrollbar {
+  overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #474747 #1e1e1e;
+}

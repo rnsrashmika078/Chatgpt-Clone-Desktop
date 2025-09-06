@@ -1,7 +1,6 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DropDown from "./DropDown";
-import { CiDark, CiDesktop, CiLight } from "react-icons/ci";
 
 const Theme = () => {
     const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
@@ -83,7 +82,8 @@ const Theme = () => {
                 dropdownRef={dropdownRef}
                 handleActionChanges={handleChangeTheme}
             />
-            {["system", "dark", "light"].map((mode, i) => (
+            {["system", "dark", "light"].map((_mode, i) => (
+                    // @ts-expect-error: key prop error
                 <div key={i}></div>
             ))}
 

@@ -26,6 +26,7 @@ const DropDown: React.FC<Theme> = ({
     system: <CiDesktop size={25} />,
   };
   return (
+    // @ts-expect-error: ref prop error
     <div className="relative " ref={dropdownRef}>
       <div
         className="rounded-2xl"
@@ -45,6 +46,7 @@ const DropDown: React.FC<Theme> = ({
         >
           {itemArray?.map((item, index) => (
             <li
+                // @ts-expect-error: key prop error
               key={index}
               className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
               onClick={() => handleActionChanges(item)}

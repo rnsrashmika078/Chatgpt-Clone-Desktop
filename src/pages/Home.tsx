@@ -1,4 +1,4 @@
-import Main from "@/components/Dashboard/Main";
+import Main from "@/components/main/Main";
 
 const Home = () => {
     return (

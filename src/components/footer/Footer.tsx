@@ -1,8 +1,7 @@
-
 const Footer = () => {
   return (
-    <div className="text-xs p-2 font-custom flex justify-center items-center text-white bg-[#232222]">
-      By messaging you will experience how chatgpt clone works
+    <div className="z-50 absolute bottom-0 justify-center items-center text-xs p-2 text-white bg-[#232222] ">
+      By messaging with this you will experience how bad chatgpt is!
     </div>
   );
 };

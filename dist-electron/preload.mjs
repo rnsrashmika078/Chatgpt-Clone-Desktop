@@ -19,8 +19,19 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   invoke(...args) {
     const [channel, ...omit] = args;
     return electron.ipcRenderer.invoke(channel, ...omit);
-  },
-  // You can expose other APTs you need here.
-  getMetadata: (filePath) => electron.ipcRenderer.invoke("get-metadata", filePath)
+  }
+});
+electron.contextBridge.exposeInMainWorld("chatgpt", {
+  ask: (prompt) => electron.ipcRenderer.invoke("ask-chatgpt", prompt)
+});
+electron.contextBridge.exposeInMainWorld("auth", {
+  setAuthUser: (authUser) => electron.ipcRenderer.send("save-auth-user", authUser),
+  getAuthUser: () => electron.ipcRenderer.invoke("get-auth-user")
+});
+electron.contextBridge.exposeInMainWorld("updater", {
+  checkForUpdate: () => electron.ipcRenderer.send("check_for_update"),
+  installUpdate: () => electron.ipcRenderer.send("install_update"),
+  onUpdateAvailable: (callback) => electron.ipcRenderer.on("update-available", callback),
+  onUpdateDownloaded: (callback) => electron.ipcRenderer.on("update_downloaded", callback)
 });
 console.log("preload loaded");

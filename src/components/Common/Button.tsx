@@ -1,74 +1,60 @@
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    name?: string;
-    variant?:
-        | "default"
-        | "outline"
-        | "gradient"
-        | "negative"
-        | "positive"
-        | "danger"
-        | "windows"
-        | "darkLight"
-        | "dark";
-    size?: "xs" | "sm" | "md" | "lg";
-    radius?: "xs" | "md" | "xl" | "full";
-    children?: React.ReactNode;
+  name?: string;
+  variant?: "default" | "dark" | "light" | "transparent";
+  size?: "xs" | "sm" | "md" | "lg";
+  radius?: "xs" | "md" | "xl" | "full";
+  children?: React.ReactNode;
+  textAlign?: "left" | "right" | "center";
+  border?: boolean;
 }
 
 const Button = ({
-    name,
-    variant = "default",
-    size = "md",
-    radius = "xs",
-    className,
-    children,
-    ...props
+  name,
+  variant = "default",
+  size = "md",
+  radius = "xs",
+  className,
+  textAlign = "center",
+  border = true,
+  children,
+  ...props
 }: ButtonProps) => {
-    const variants = {
-        default:
-            "bg-blue-600 text-white hover:bg-blue-700 hover:cursor-pointer hover:shadow-md transition",
-        danger: "bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer hover:shadow-md transition",
-        positive:
-            "bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer hover:shadow-md transition",
-        negative:
-            "bg-gray-500 text-white hover:bg-gray-700 hover:cursor-pointer hover:shadow-md transition",
-        dark: "bg-gray-900 text-white hover:bg-gray-700 hover:cursor-pointer hover:shadow-md transition",
-        outline:
-            "border border-gray-400 text-white hover:bg-black hover:cursor-pointer hover:shadow-md transition",
-        gradient:
-            "bg-gradient-animated text-white hover:cursor-pointer hover:shadow-md transition",
-        windows: `border border-gray-300 text-gray-600 hover:cursor-pointer hover:shadow-md transition  ${
-            props.disabled
-                ? "bg-gray-300 text-white"
-                : "hover:bg-gray-300 bg-gray-200 hover:cursor-pointer hover:shadow-md transition"
-        }`,
-        darkLight: `border border-gray-600 hover:cursor-pointer hover:shadow-md transition  ${
-            props.disabled
-                ? "bg-blue-950"
-                : "hover:bg-gray-700 bg-blue-950  hover:cursor-pointer hover:shadow-md transition"
-        }`,
-    };
+  const variants = {
+    default:
+      "bg-blue-600 text-white hover:bg-blue-700 hover:cursor-pointer hover:shadow-md transition",
+    light: "text-xs bg-white  font-semibold hover:bg-[#dedede] text-black ",
+    transparent: `text-white text-xs bg-transparent font-semibold ${
+      border ? "border border-gray-400" : ""
+    } `,
+    dark: "text-white text-xs bg-black  font-semibold hover:bg-[#141414]",
+  };
 
-    const sizes = {
-        xs: "px-3  py-1 text-xs",
-        sm: "px-3  py-1 text-sm",
-        md: "px-4 py-1 text-base",
-        lg: "px-5  py-1 text-lg",
-    };
-    const radiuses = {
-        xs: "rounded-xs",
-        md: "rounded-md",
-        xl: "rounded-xl",
-        full: "rounded-full",
-    };
+  const sizes = {
+    xs: "px-3 py-1.5 text-xs",
+    sm: "px-3 py-1.5 text-sm",
+    md: "px-3 py-2  text-base",
+    lg: "px-3 py-4 text-lg",
+  };
+  const radiuses = {
+    xs: "rounded-xs",
+    md: "rounded-md",
+    xl: "rounded-xl",
+    full: "rounded-full",
+  };
 
-    const style = `flex py-2 justify-center items-center transition-all gap-2 ${radiuses[radius]} ${variants[variant]} ${sizes[size]} ${className}`;
-    return (
-        <button className={`${style}`} {...props}>
-            {children}
-            {name}
-        </button>
-    );
+  const textAlignment = {
+    left: "justify-start pl-5",
+    center: "justify-center",
+    right: "justify-end pr-5",
+  };
+
+  const style = `flex py-1 relative items-center ${textAlignment[textAlign]} transition-all gap-2 ${radiuses[radius]} ${variants[variant]} ${sizes[size]} ${className}`;
+  return (
+    <button className={`${style}`} {...props}>
+      {children}
+      {name}
+    </button>
+  );
 };
 
 export default Button;
