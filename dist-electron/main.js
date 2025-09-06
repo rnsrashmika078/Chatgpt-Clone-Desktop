@@ -29127,12 +29127,11 @@ function createWindow() {
   });
 }
 UserPreference();
-const api_key = "AIzaSyCWoGfvkQq8lsNPWQYeTuYDDzRN2x4AVOs";
 ipcMain$1.handle("ask-chatgpt", async (_event, prompt) => {
   var _a, _b, _c, _d, _e, _f;
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${api_key}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${"AIzaSyCWoGfvkQq8lsNPWQYeTuYDDzRN2x4AVOs"}`,
       {
         method: "POST",
         headers: {

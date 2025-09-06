@@ -1,7 +1,7 @@
 {
 	"name": "electron-react-tailwind",
 	"private": true,
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
@@ -63,11 +63,13 @@
 			"dist/**/*",
 			"dist-electron/**/*"
 		],
+		"repository":"https://github.com/rnsrashmika078/Chatgpt-Clone-Desktop.git",
 		"publish": [
 			{
 			  "provider": "github",
 			  "owner": "rnsrashmika078",
-			  "repo": "Chatgpt-Clone-Desktop"
+			  "repo": "Chatgpt-Clone-Desktop",
+			  "releaseType":"release"
 			}
 		],
 		"asar": true,

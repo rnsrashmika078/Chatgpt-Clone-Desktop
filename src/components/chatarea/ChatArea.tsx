@@ -51,13 +51,12 @@ const ChatArea = () => {
   };
   const checkForUpdate = () => {
     window.updater.checkForUpdate();
+    // window.updater.onUpdateAvailable((info) => {
+    //   console.log("Update available:", info.version);
+    // });
   };
 
-  useEffect(() => {
-    window.updater.onUpdateAvailable((info) => {
-      console.log("Update available:", info.version);
-    });
-  }, []);
+  useEffect(() => {}, []);
   return (
     <div className="relative w-full px-10 h-full overflow-x-hidden">
       <div className="absolute">
