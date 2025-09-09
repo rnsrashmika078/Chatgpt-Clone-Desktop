@@ -65,18 +65,18 @@ const Main = () => {
       className={` text-white transition-all  duration-600 w-full flex h-full overflow-hidden`}
       // style={{ height: `${height}px` }}
     >
-      
-      <div className="flex w-full h-full  ">
+      <div className="flex w-full h-full ">
         {authUser?.authenticated && (
+        
           <Sidebar toggleSidebar={toggleSidebar} isToggle={isToggle} />
         )}
         <div className=" flex  flex-col w-full justify-start items-center h-full">
-          <div className=" flex flex-col w-full justify-start items-center ">
-            <Nav />
+          <div className=" flex flex-col w-full justify-start items-center h-[60px] ">
+            <Nav toggleSidebar={toggleSidebar} isToggle={isToggle} />
           </div>
           <div
-            className="flex z-[9999] flex-col w-full md:w-8/12 justify-start items-center custom-scrollbar overflow-x-hidden"
-            style={{ height: height - 200 }}
+            className="flex z-[9999] flex-col w-full justify-start items-center custom-scrollbar overflow-x-hidden h-full"
+            // style={{ height: height - 200 }}
           >
             <ChatArea />
             {/* <motion.div
@@ -92,12 +92,12 @@ const Main = () => {
               <AskAI />
             </motion.div> */}
           </div>
-          <motion.div className="w-full mt-8">
+          <motion.div className="w-full mt-14 z-[10001]">
             <AskAI />
           </motion.div>
-          <div className=" flex flex-col w-full justify-start items-center ">
+          {/* <div className=" flex flex-col w-full justify-start items-center ">
             <Footer />
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

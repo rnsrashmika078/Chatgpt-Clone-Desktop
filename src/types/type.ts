@@ -1,5 +1,5 @@
-
 export interface UserMessage {
+  messageId: string;
   chatId: string;
   // messageId: string;
   // from: From;

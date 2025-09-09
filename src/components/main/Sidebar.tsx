@@ -1,16 +1,11 @@
 import { useEffect, useState } from "react";
 import { GrCloudlinux, GrGallery } from "react-icons/gr";
 import Profile from "@/assets/electron-logo.svg";
-import {
-  BiDockLeft,
-  BiEdit,
-
-  BiSearch,
-} from "react-icons/bi";
+import { BiDockLeft, BiEdit, BiSearch } from "react-icons/bi";
 import { useChatClone } from "@/zustand/store";
 import { supabase } from "@/supabase/Supabase";
 import { UpdateChat } from "@/types/type";
-
+import { MdDelete } from "react-icons/md";
 
 interface Props {
   toggleSidebar: () => void;
@@ -21,8 +16,10 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
   const activeChat = useChatClone((store) => store.activeChat);
   const setActiveChat = useChatClone((store) => store.setActiveChat);
   const updateChats = useChatClone((store) => store.updateChats);
+  const deleteChat = useChatClone((store) => store.deleteChat);
   const setUserMessages = useChatClone((store) => store.setUserMessages);
   const chats = useChatClone((store) => store.chats);
+  const setTrackId = useChatClone((store) => store.setTrackId);
 
   const ItemList = [
     {
@@ -63,16 +60,49 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
     fetchAllChats();
   }, []);
 
-  console.log("active chat", activeChat?.chatId);
+  const handleDeleteChat = async (chatId: string) => {
+    const { error } = await supabase
+      .from("chats")
+      .delete()
+      .eq("chatId", chatId);
+
+    if (error) {
+      console.error("Delete failed:", error.message);
+    } else {
+      console.log("Chat deleted:", chatId);
+      // update local state
+      deleteChat(chatId);
+    }
+  };
+  const handleDeleteChatMessages = async (chatId: string) => {
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("chatId", chatId);
+
+    if (error) {
+      console.error("Delete failed:", error.message);
+    } else {
+      console.log("Chat deleted:", chatId);
+      setUserMessages(null);
+    }
+  };
+
+  const style = `px-2 text-sm custom-scrollbar bg-[#161515] flex flex-col justify-between z-[10000]  transition-all ${
+    isToggle
+      ? "w-[350px] fixed md:relative"
+      : "w-[0] fixed md:relative md:w-[60px]"
+  } h-full border-r border-[#3d3d3d] overflow-x-hidden`;
+
   return (
     <div
-      className="text-sm custom-scrollbar bg-[#161515] flex flex-col justify-between z-[9999]  transition-all  w-full h-full border-r border-[#3d3d3d] overflow-x-hidden"
-      style={{
-        width: isToggle ? "350px" : "60px",
-      }}
+      className={`${style}`}
+      // style={{
+      //   width: isToggle ? "350px" : "60px",
+      // }}
     >
       <div className=" flex-shrink-0 ">
-        <div className="border-b shadow-md border-[#393939] sticky top-0 bg-[#161515] px-2 py-2">
+        <div className="border-b shadow-md border-[#393939] sticky top-0 bg-[#161515] py-2">
           {isToggle ? (
             <div className="transition-all flex w-full justify-between mb-5 ">
               <GrCloudlinux
@@ -114,10 +144,10 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
             <div
               // @ts-expect-error: key not identified
               key={index}
-              className=" cursor-pointer transition-all flex justify-start items-center hover:bg-[#444444] rounded-md  "
+              className="cursor-pointer transition-all flex justify-start items-center hover:bg-[#444444] rounded-md px-0.5"
               onClick={() => {
                 if (item.name === "New chat") {
-                  console.log("NEWCHAT");
+                  setTrackId(null);
                   setActiveChat(null);
                   setUserMessages(null);
                 }
@@ -130,7 +160,7 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
               )}
               {/* {isToggle && } */}
               <p
-                className={`transition-all duration-300 overflow-hidden ${
+                className={`w-36 truncate transition-all duration-300 overflow-hidden ${
                   isToggle ? "opacity-100 " : "opacity-0 w-0 ml-0"
                 }`}
               >
@@ -141,7 +171,7 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
         </div>
 
         <h1
-          className={` px-5  ${
+          className={` px-2  ${
             isToggle ? "opacity-100 " : "opacity-0 w-0 ml-0"
           } text-[#6c6c6c] mt-5`}
         >
@@ -155,19 +185,32 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
               // @ts-expect-error: key not identified
               key={index}
               onClick={() => {
+                toggleSidebar();
                 setActiveChat(item);
               }}
-              className={`${
+              className={`text-xs flex justify-between my-1 ${
                 activeChat?.chatId === item.chatId ? "bg-[#444444]" : ""
-              } px-5 hover:bg-[#444444] rounded-md  cursor-pointer flex justify-start items-center gap-2 py-2`}
+              } px-2 hover:bg-[#444444] rounded-md  cursor-pointer flex justify-start items-center gap-2 py-1`}
             >
-              {item.title}
-              {/* {item.chatId} */}
+              <p className="w-36 truncate">{item.title}</p>
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteChat(item.chatId);
+                  handleDeleteChatMessages(item.chatId);
+                }}
+              >
+                <MdDelete
+                  color="white"
+                  size={25}
+                  className="rounded-full hover:bg-[#727272] p-1"
+                />
+              </span>
             </div>
           ))}
       </div>
       <div className="flex border-t border-[#393939]  flex-row gap-2  sticky bottom-0 ">
-        <div className="flex gap-2 justify-center items-center hover:bg-[#444444] shadow-md px-4 py-2 ">
+        <div className="flex gap-2 justify-center items-center hover:bg-[#444444] shadow-md px-2 py-2 ">
           <img
             src={Profile}
             className="flex flex-col w-6 h-6 flex-shrink-0"
@@ -175,7 +218,7 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
           {isToggle && (
             <div className="">
               <p
-                className={`transition-all duration-300 overflow-hidden ${
+                className={`w-5 lg:w-full truncate transition-all duration-300 overflow-hidden ${
                   isToggle ? "opacity-100 " : "opacity-0 w-0 ml-0"
                 }`}
               >

@@ -5,12 +5,12 @@ import { autoUpdater } from "electron-updater";
 import path from "node:path";
 import dotenv from "dotenv";
 import { UserPreference } from "./storage";
+
 createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, "..");
 dotenv.config({ path: path.join(__dirname, "..", ".env.local") });
 
-// 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 export const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
@@ -35,7 +35,6 @@ function createWindow() {
     autoHideMenuBar: true,
   });
 
-  // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
   });
@@ -43,37 +42,62 @@ function createWindow() {
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
   } else {
-    // win.loadFile('dist/index.html')
     win.loadURL(`file://${path.join(RENDERER_DIST, "index.html")}`);
   }
 
+  // ✅ AutoUpdater events
+  autoUpdater.on("checking-for-update", () => {
+    console.log("Checking for update...");
+    win?.webContents.send("checking_for_update");
+  });
+
   autoUpdater.on("update-available", (info) => {
-    // info contains details about the new version
     console.log("Update available!", info);
     win?.webContents.send("update_available", info);
   });
-  autoUpdater.on("update-downloaded", () => {
-    win?.webContents.send("update_downloaded");
+
+  autoUpdater.on("update-not-available", (info) => {
+    console.log("No updates available.");
+    win?.webContents.send("update_not_available", info);
+  });
+
+  autoUpdater.on("error", (err) => {
+    console.error("Update failed:", err);
+    win?.webContents.send(
+      "update_error",
+      err == null ? "unknown" : err.message || err
+    );
+  });
+
+  autoUpdater.on("update-downloaded", (info) => {
+    console.log("Update downloaded. Ready to install.");
+    win?.webContents.send("update_downloaded", info);
   });
 }
+
 UserPreference();
 
 ipcMain.handle("ask-chatgpt", async (_event, prompt) => {
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${"AIzaSyCWoGfvkQq8lsNPWQYeTuYDDzRN2x4AVOs"}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-        }),
-      }
-    );
+    // const res = await fetch(
+    //   `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    //   {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+    //   }
+    // );
+    const res = await fetch("http://localhost:11434/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "llama3.2:latest",
+        prompt: prompt,
+        stream: false, // no streaming
+      }),
+    });
+    const data = await res.json();
 
-    // Handle non-200 responses
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       return {
@@ -83,37 +107,18 @@ ipcMain.handle("ask-chatgpt", async (_event, prompt) => {
       };
     }
 
-    const data = await res.json();
-
-    console.log(data);
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    return {
-      error: false,
-      message: reply || "No reply received",
-    };
+    const text = data.response;
+    console.log("TEXT REPLY", text);
+    return { error: false, message: text || "No reply received" };
   } catch (error) {
-    if (error instanceof Error) {
-      return {
-        error: true,
-        message: error.message,
-      };
-    }
     return {
       error: true,
-      message: "Unknown error occurred",
+      message:
+        error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 });
 
-// Listen for update install from renderer
-
-ipcMain.on("check_for_update", () => {
-  autoUpdater.checkForUpdates();
-});
-ipcMain.on("install_update", () => {
-  autoUpdater.quitAndInstall();
-});
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
@@ -122,8 +127,6 @@ app.on("window-all-closed", () => {
 });
 
 app.on("activate", () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }

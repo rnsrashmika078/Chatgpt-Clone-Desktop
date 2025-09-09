@@ -29118,30 +29118,45 @@ function createWindow() {
   } else {
     win.loadURL(`file://${path.join(RENDERER_DIST, "index.html")}`);
   }
+  mainExports$1.autoUpdater.on("checking-for-update", () => {
+    console.log("Checking for update...");
+    win == null ? void 0 : win.webContents.send("checking_for_update");
+  });
   mainExports$1.autoUpdater.on("update-available", (info) => {
     console.log("Update available!", info);
     win == null ? void 0 : win.webContents.send("update_available", info);
   });
-  mainExports$1.autoUpdater.on("update-downloaded", () => {
-    win == null ? void 0 : win.webContents.send("update_downloaded");
+  mainExports$1.autoUpdater.on("update-not-available", (info) => {
+    console.log("No updates available.");
+    win == null ? void 0 : win.webContents.send("update_not_available", info);
+  });
+  mainExports$1.autoUpdater.on("error", (err) => {
+    console.error("Update failed:", err);
+    win == null ? void 0 : win.webContents.send(
+      "update_error",
+      err == null ? "unknown" : err.message || err
+    );
+  });
+  mainExports$1.autoUpdater.on("update-downloaded", (info) => {
+    console.log("Update downloaded. Ready to install.");
+    win == null ? void 0 : win.webContents.send("update_downloaded", info);
   });
 }
 UserPreference();
 ipcMain$1.handle("ask-chatgpt", async (_event, prompt) => {
-  var _a, _b, _c, _d, _e, _f;
+  var _a;
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${"AIzaSyCWoGfvkQq8lsNPWQYeTuYDDzRN2x4AVOs"}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
-      }
-    );
+    const res = await fetch("http://localhost:11434/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "llama3.2:latest",
+        prompt,
+        stream: false
+        // no streaming
+      })
+    });
+    const data = await res.json();
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       return {
@@ -29150,31 +29165,15 @@ ipcMain$1.handle("ask-chatgpt", async (_event, prompt) => {
         message: ((_a = errorData == null ? void 0 : errorData.error) == null ? void 0 : _a.message) || "Request failed"
       };
     }
-    const data = await res.json();
-    console.log(data);
-    const reply = (_f = (_e = (_d = (_c = (_b = data == null ? void 0 : data.candidates) == null ? void 0 : _b[0]) == null ? void 0 : _c.content) == null ? void 0 : _d.parts) == null ? void 0 : _e[0]) == null ? void 0 : _f.text;
-    return {
-      error: false,
-      message: reply || "No reply received"
-    };
+    const text = data.response;
+    console.log("TEXT REPLY", text);
+    return { error: false, message: text || "No reply received" };
   } catch (error2) {
-    if (error2 instanceof Error) {
-      return {
-        error: true,
-        message: error2.message
-      };
-    }
     return {
       error: true,
-      message: "Unknown error occurred"
+      message: error2 instanceof Error ? error2.message : "Unknown error occurred"
     };
   }
-});
-ipcMain$1.on("check_for_update", () => {
-  mainExports$1.autoUpdater.checkForUpdates();
-});
-ipcMain$1.on("install_update", () => {
-  mainExports$1.autoUpdater.quitAndInstall();
 });
 app$1.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

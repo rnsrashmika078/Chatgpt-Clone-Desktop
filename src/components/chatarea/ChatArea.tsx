@@ -1,11 +1,10 @@
 import { useChatClone } from "@/zustand/store";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 // @ts-expect-error:import path error
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 // @ts-expect-error:import path error
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import CopyToClipboard from "../common/CopyToClipboard";
-import Button from "../common/Button";
 
 const ChatArea = () => {
   type Lang = "javascript" | "java" | "c++" | "c" | "jsx" | "python";
@@ -49,19 +48,24 @@ const ChatArea = () => {
       alert(error);
     }
   };
-  const checkForUpdate = () => {
-    window.updater.checkForUpdate();
-    // window.updater.onUpdateAvailable((info) => {
-    //   console.log("Update available:", info.version);
-    // });
-  };
 
-  useEffect(() => {}, []);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [userMessages]);
+
   return (
-    <div className="relative w-full px-10 h-full overflow-x-hidden">
-      <div className="absolute">
-        <Button name="Update" onClick={checkForUpdate}></Button>
-      </div>
+    <div
+      className="z-[9998] relative w-full px-10 h-full overflow-x-hidden"
+      ref={chatContainerRef}
+    >
+      {/* <UpdateButton /> */}
 
       {userMessages &&
         userMessages?.map((msg, index) => (
@@ -70,13 +74,14 @@ const ChatArea = () => {
             <div className={`p-4 w-full flex justify-end items-end`}>
               {/* // 🟢 USER MESSAGE */}
               <div className="relative">
-                <pre className="relative font-custom shadow-md bg-[#3e3e3e] rounded-xl px-2 py-2">
+                <pre className="relative font-custom shadow-md bg-[#3e3e3e] rounded-xl px-2 py-2 max-w-full overflow-x-auto">
                   {msg.user}
                 </pre>
+
                 <CopyToClipboard handleCopy={handleCopy} text={msg.user} />
               </div>
             </div>
-            <div className="justify-start ">
+            <div className="justify-start w-full ">
               {msg.ai === "loading" ? (
                 // 🟡 LOADING DOT
                 <div className="relative font-custom">
@@ -84,7 +89,7 @@ const ChatArea = () => {
                 </div>
               ) : (
                 // 🔵 AI RESPONSE
-                <div className="relative font-custom ">
+                <div className="relative font-custom w-full">
                   {msg.ai && msg.ai.split("```")[1] && (
                     <>
                       <p className="relative font-custom px-2 py-2  w-full">
@@ -96,13 +101,26 @@ const ChatArea = () => {
                             text={msg.ai}
                           />
                         )} */}
+                        ITS PRINT FROM THERE
                       </p>
-                      <SyntaxHighlighter
-                        language={detectLanguage(msg.ai)}
-                        style={vscDarkPlus}
-                      >
-                        {msg.ai && msg.ai.split("```")[1]}
-                      </SyntaxHighlighter>
+                      <div>
+                        <SyntaxHighlighter
+                          language={detectLanguage(msg.ai)}
+                          style={vscDarkPlus}
+                          customStyle={{
+                            borderRadius: "0.75rem",
+                            padding: "1rem",
+                            fontSize: "0.9rem",
+                            maxWidth: "100%", // keep inside container
+                            overflowX: "auto",
+                            // enable horizontal scroll
+                          }}
+                          wrapLongLines={true} // break super long lines
+                        >
+                          {msg.ai && msg.ai.split("```")[1]}
+                        </SyntaxHighlighter>
+                      </div>
+
                       <CopyToClipboard
                         handleCopy={handleCopy}
                         text={msg.ai}
@@ -117,6 +135,7 @@ const ChatArea = () => {
                             text={msg.ai}
                           />
                         )} */}
+                        ITS PRINT FROM THERE
                       </p>
                     </>
                   )}
@@ -130,6 +149,7 @@ const ChatArea = () => {
                           text={msg.ai}
                         />
                       )}
+                      ITS PRINT FROM THERE
                     </p>
                   )}
                 </div>

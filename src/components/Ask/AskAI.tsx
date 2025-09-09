@@ -7,26 +7,30 @@ import { useChatClone } from "@/zustand/store";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/supabase/Supabase";
 import { UserMessage } from "@/types/type";
+import { useNavigate } from "react-router-dom";
 
 const AskAI = () => {
   type HoverItem = {
     name: string;
     isHover: boolean;
   };
-
+  //states
   const [searchText, setSearchText] = useState<string>("");
   const [hoverItem, setHoverItem] = useState<HoverItem | null>(null);
+  const [chatTitle, setChatTitle] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  //zustand - global states
   const setUserMessages = useChatClone((store) => store.setUserMessages);
   const setNotification = useChatClone((store) => store.setNotification);
+  const setTrackId = useChatClone((store) => store.setTrackId);
+  const trackId = useChatClone((store) => store.trackId);
   const setChat = useChatClone((store) => store.setChats);
+  const authUser = useChatClone((store) => store.authUser);
   const setAllmessage = useChatClone((store) => store.setAllmessage);
   const setUpdateMessage = useChatClone((store) => store.setUpdateMessage);
   const userMessages = useChatClone((store) => store.userMessages);
   const activeChat = useChatClone((store) => store.activeChat);
-  const [chatTitle, setChatTitle] = useState<string | null>(null);
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSearch = (text: string) => {
     setSearchText(text);
@@ -48,10 +52,7 @@ const AskAI = () => {
   const handleSaveChats = async (chatId: string, title: string) => {
     const chatData = { chatId, title };
 
-    const { error } = await supabase
-      .from("chats") 
-      .insert([chatData]);
-    // .select(); // optional: returns inserted row
+    const { error } = await supabase.from("chats").insert([chatData]);
 
     if (error) {
       console.error("Insert failed:", error.message);
@@ -59,70 +60,104 @@ const AskAI = () => {
       // console.log("Message saved:", data);
     }
   };
-  const errorcode = "https://ai.google.dev/gemini-api/docs/rate-limits";
-  const [quoataOver, setQuoataOver] = useState<string>();
-  const [trackId, setTrackId] = useState<string | null>(null);
   const handleAskAi = (prompt: string) => {
-    let id = trackId ?? uuidv4();
+    let id = trackId ?? uuidv4(); // to track the current chat
+    let messageId = uuidv4(); /// to track the current message
 
-    if (!trackId) setTrackId(id);
+    // if (!trackId) setTrackId(id);
 
+    //this will show the user prompt in the ChatArea Section without AI response. AI response is on loading..!
     setUserMessages({
       chatId: trackId ?? id,
-      // messageId: aiMessageId,
+      messageId,
       user: prompt,
       ai: "loading",
     });
+
     setSearchText("");
-    const modifiedPrompt = `${prompt} | NOTE:give Title and wrap in ** ( title only - unique ) and then Reply in less words. title also short `;
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+    // const modifiedPrompt = `${prompt} | NOTE:give Title and wrap in ** ( title only - unique ) and reply. title must be and unique short. and this the chat history: ${JSON.stringify(
+    //   userMessages
+    // )}`;
+
+    const username = authUser?.email ?? "User";
+    console.log(username);
+
+    const historyText =
+      userMessages && userMessages.length > 0
+        ? userMessages
+            .map((msg) => `User: ${msg.user}\nAI: ${msg.ai}`)
+            .join("\n\n")
+        : "No previous messages.";
+
+    const modifiedPrompt = `
+    You are OzoneGPT, an AI assistant in a chat application.  
+    Your tasks:  
+    1. Always generate a **short, unique, and descriptive title** for the chat and wrap it in ** (example: **Shopping Tips**).  
+    2. Start the conversation by addressing the user by their name:  ("${username}").  
+    3. Provide your response to the latest user query.  
+    4. Keep the conversation consistent with the previous chat history.  
+    
+    Chat History so far:  
+    ${historyText}  
+    
+    Now, here is the new user message you must reply to:  
+    "${prompt}"
+    `;
 
     if (modifiedPrompt) {
       const askFromAI = async () => {
-        const reply = await window.chatgpt.ask(modifiedPrompt);
+        const reply = await window.chatgpt.ask(modifiedPrompt); // get the ai response from the api
+
+        // if errors show it in notifications
         if (reply.error) {
           setNotification(reply.message);
         }
 
+        // if no rely generated then this function ends here
         if (!reply) return;
 
-        if (reply && reply.message.includes(errorcode)) {
-          setQuoataOver(reply.message);
-
-          console.log(reply.message);
-          return;
-        }
-        const aiMessage = reply.message;
-        const rawMessage = aiMessage.split("**")[2] || "";
-
+        const aiMessage = reply.message; // get the actual response from the response object
+        const rawMessage = aiMessage.split("**")[2] || ""; // this is the message that removed title -> this doesn't include the title
         if (!trackId && !activeChat?.chatId) {
-          const rawTitle = aiMessage.split("**")[1] || "Chat";
-          setChatTitle(rawTitle);
-          const chatData = { chatId: id, title: rawTitle };
+          {
+            /*This condition use to check whether the current chat or not 
+            case : True
+                -> New Chat
+                -> First message of the chat
+                -> Generate the title to the chat     */
+          }
+
+          const title = aiMessage.split("**")[1] || "Chat"; // ai will generate title inside the astrix marks so grab that title
+          setChatTitle(title); // set chat title -> this state use for check the current chat has title so that until the next render cycle this stays as 'not new chat in next message'
+          const chatData = { chatId: id, title: title };
           setChat(chatData);
-          await handleSaveChats(id, rawTitle);
-          setUpdateMessage(id, rawMessage);
+          await handleSaveChats(id, title);
+          setUpdateMessage(messageId, rawMessage);
 
           const message = {
             id: uuidv4(),
-            title: rawTitle,
+            title: title,
             chatId: id,
             user: prompt,
             ai: rawMessage,
           };
 
           const { data, error } = await supabase
-            .from("messages") // ✅ use your actual table name
+            .from("messages")
             .insert([message]);
-          // .select(); // optional: returns inserted row
 
           if (error) {
             console.error("Insert failed:", error.message);
           } else {
             console.log("Message saved:", data);
           }
+          setTrackId(id);
           return;
         }
-        setUpdateMessage(id, rawMessage);
+        setUpdateMessage(messageId, rawMessage);
         const message = {
           id: uuidv4(),
           title: chatTitle ?? activeChat?.title,
@@ -130,30 +165,28 @@ const AskAI = () => {
           user: prompt,
           ai: rawMessage,
         };
-
-        /* eslint @typescript-eslint/no-unused-vars: "warn" */
-
         const { error } = await supabase
-          .from("messages") // ✅ use your actual table name
+          .from("messages")
           .insert([message])
-          .select(); // optional: returns inserted row
+          .select();
 
         if (error) {
           console.error("Insert failed:", error.message);
         } else {
-          // console.log("Message saved:", data);
         }
       };
       askFromAI();
     }
   };
+
   useEffect(() => {
     if (activeChat?.chatId) {
       const fetchMessagesByChatId = async () => {
         const { data, error } = await supabase
           .from("messages")
           .select("*")
-          .eq("chatId", activeChat.chatId);
+          .eq("chatId", activeChat.chatId)
+          .order("created_at", { ascending: true });
 
         if (error) {
           console.error("Fetch error:", error.message);
@@ -167,12 +200,13 @@ const AskAI = () => {
   }, [activeChat?.chatId]);
 
   return (
-    <div className=" mb-5 bottom-0 left-0 right-0 z-40 flex flex-col items-center w-full  pb-4">
+    <div className="w-1/2 mb-5 fixed left-1/2 bottom-0 -translate-x-1/2 ">
+      {/* // <div className=" mb-5 bottom-0 left-0 right-0 z-40 flex flex-col items-center w-full  pb-4"> */}
       {!(userMessages && userMessages.length > 0) && (
         <h1 className="text-3xl font-bold font-story mb-4">OzoneGPT</h1>
       )}
 
-      <div className="relative flex items-end w-8/12 bg-[#313131] rounded-2xl shadow-xl">
+      <div className="relative flex items-end w-full  bg-[#313131] rounded-2xl shadow-xl">
         {/* Add Button */}
         <div className="absolute bottom-2 left-2 flex items-center">
           <span
@@ -189,23 +223,11 @@ const AskAI = () => {
           )}
         </div>
 
-        {quoataOver && (
-          <div className="absolute -top-32 text-center bg-[#2d2d2d] rounded-2xl p-5">
-            {quoataOver}
-          </div>
-        )}
         {/* Textarea */}
         <textarea
           ref={textareaRef}
           value={searchText}
           rows={1}
-          // disabled={
-          //   userMessages &&
-          //   userMessages[userMessages.length - 1]?.message.includes(error)
-          //     ? true
-          //     : false
-          // }
-          // contentEditable
           placeholder="Send a message..."
           onChange={(e) => handleSearch(e.target.value)}
           className="resize-none custom-scrollbar bg-transparent w-full text-white placeholder:text-[#b3b1b1] px-10 py-3 pr-12 rounded-2xl focus:outline-none"

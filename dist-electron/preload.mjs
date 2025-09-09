@@ -29,9 +29,15 @@ electron.contextBridge.exposeInMainWorld("auth", {
   getAuthUser: () => electron.ipcRenderer.invoke("get-auth-user")
 });
 electron.contextBridge.exposeInMainWorld("updater", {
+  // Trigger update check
   checkForUpdate: () => electron.ipcRenderer.send("check_for_update"),
+  // Install downloaded update
   installUpdate: () => electron.ipcRenderer.send("install_update"),
-  onUpdateAvailable: (callback) => electron.ipcRenderer.on("update-available", callback),
-  onUpdateDownloaded: (callback) => electron.ipcRenderer.on("update_downloaded", callback)
+  // Update lifecycle listeners
+  onChecking: (callback) => electron.ipcRenderer.on("checking_for_update", callback),
+  onUpdateAvailable: (callback) => electron.ipcRenderer.on("update_available", callback),
+  onUpdateNotAvailable: (callback) => electron.ipcRenderer.on("update_not_available", callback),
+  onUpdateDownloaded: (callback) => electron.ipcRenderer.on("update_downloaded", callback),
+  onError: (callback) => electron.ipcRenderer.on("update_error", callback)
 });
 console.log("preload loaded");

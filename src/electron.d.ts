@@ -15,6 +15,8 @@ declare global {
       getAuthUser: () => Promise<AuthUser>;
     };
     updater: {
+      onChecking(arg0: () => void): unknown;
+      onError(arg0: (err: any) => void): unknown;
       checkForUpdate: () => void; // triggers update check
       installUpdate: () => void; // triggers update installation
       onUpdateAvailable: (

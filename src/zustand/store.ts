@@ -4,6 +4,7 @@ import { AuthUser, UpdateChat, UserMessage } from "@/types/type";
 type ChatStore = {
   height: number;
   loading: boolean;
+  trackId: string | null;
   chats: UpdateChat[] | null;
   authUser: AuthUser | null;
   userMessages: UserMessage[] | null;
@@ -19,6 +20,8 @@ type ChatStore = {
   setAllmessage: (messages: UserMessage[]) => void;
   updateChats: (mutateChats: UpdateChat[]) => void;
   setActiveChat: (chatData: UpdateChat | null) => void;
+  deleteChat: (id: string) => void;
+  setTrackId: (id: string | null) => void;
 };
 
 type ActiveTabStore = {
@@ -29,6 +32,7 @@ type ActiveTabStore = {
 export const useChatClone = create<ChatStore>((set) => ({
   userMessages: null,
   notifier: null,
+  trackId: null,
   authUser: null,
   loading: false,
   chats: null,
@@ -49,11 +53,16 @@ export const useChatClone = create<ChatStore>((set) => ({
   setUpdateMessage: (id, message) =>
     set((state) => ({
       userMessages: state.userMessages?.map((msg) =>
-        msg.chatId === id ? { ...msg, ai: message } : msg
+        msg.messageId === id ? { ...msg, ai: message } : msg
       ),
     })),
   setAllmessage: (messages) => set(() => ({ userMessages: messages })),
   updateChats: (mutateChats) => set(() => ({ chats: mutateChats })),
+  deleteChat: (id) =>
+    set((state) => ({
+      chats: state.chats?.filter((ch) => ch.chatId !== id),
+    })),
+  setTrackId: (id) => set(() => ({ trackId: id })),
 }));
 
 export const useActiveTab = create<ActiveTabStore>((set) => ({

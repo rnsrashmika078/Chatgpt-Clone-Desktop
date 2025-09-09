@@ -33,11 +33,26 @@ contextBridge.exposeInMainWorld("auth", {
 });
 
 contextBridge.exposeInMainWorld("updater", {
+  // Trigger update check
   checkForUpdate: () => ipcRenderer.send("check_for_update"),
+
+  // Install downloaded update
   installUpdate: () => ipcRenderer.send("install_update"),
-  onUpdateAvailable: (callback: (event: any, info: any) => void) =>
-    ipcRenderer.on("update-available", callback),
-  onUpdateDownloaded: (callback: () => void) =>
+
+  // Update lifecycle listeners
+  onChecking: (callback: () => void) =>
+    ipcRenderer.on("checking_for_update", callback),
+
+  onUpdateAvailable: (callback: (_event: any, info: any) => void) =>
+    ipcRenderer.on("update_available", callback),
+
+  onUpdateNotAvailable: (callback: (_event: any, info: any) => void) =>
+    ipcRenderer.on("update_not_available", callback),
+
+  onUpdateDownloaded: (callback: (_event: any, info: any) => void) =>
     ipcRenderer.on("update_downloaded", callback),
+
+  onError: (callback: (_event: any, error: any) => void) =>
+    ipcRenderer.on("update_error", callback),
 });
 console.log("preload loaded");

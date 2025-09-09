@@ -1,14 +1,18 @@
 import { useChatClone } from "@/zustand/store";
-import {  BsArrowLeft, BsQuestionCircle } from "react-icons/bs";
+import { BsArrowLeft, BsQuestionCircle } from "react-icons/bs";
 import { BsChevronDown } from "react-icons/bs";
 import BGImage from "@/assets/sample (3).jpg";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import Button from "../common/Button";
 import { PiChatCircleSlash } from "react-icons/pi";
 import ToolTip from "../common/ToolTip";
-
-export default function Nav() {
+import { MdOutlineToggleOff } from "react-icons/md";
+interface Props {
+  toggleSidebar: () => void;
+  isToggle: boolean;
+}
+export default function Nav({ toggleSidebar, isToggle }: Props) {
   const userMessages = useChatClone((store) => store.userMessages);
   const authUser = useChatClone((store) => store.authUser);
   const [visible, setVisible] = useState<boolean>(false);
@@ -17,9 +21,9 @@ export default function Nav() {
   const path = window.location.pathname;
 
   return (
-    <div className="sticky top-0 z-[9998] w-full">
+    <div className="sticky top-0 z-[9998] w-full border-b border-[#302f2f]">
       {/* use color */}
-      <nav className="flex justify-between bg-[#232222]  p-5">
+      <nav className="flex justify-between bg-[#232222]  px-5 py-1">
         {/* <Link to="/">Home</Link> | <Link to="/about">About</Link> */}
         <div className="relative flex gap-2  justify-center items-center cursor-pointer ">
           {/* use color */}
@@ -31,6 +35,9 @@ export default function Nav() {
               onClick={() => navigate("/")}
             />
           )}
+          <span className="block mx-2 md:hidden" onClick={() => toggleSidebar()}>
+            <MdOutlineToggleOff />
+          </span>
           {userMessages && userMessages.length > 0 && (
             <div
               onClick={() => setVisible((prev) => !prev)}
