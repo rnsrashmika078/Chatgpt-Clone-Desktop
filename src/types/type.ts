@@ -11,8 +11,9 @@ export interface UserMessage {
   loading?: boolean;
 }
 export interface AuthUser {
-  id: number;
-  name: string;
+  id: string;
+  fname: string;
+  lname: string;
   email: string;
   token: string;
   authenticated?: string;

@@ -65,6 +65,7 @@ const Login = () => {
     if (error) setNotification(`${error.message}`);
     else {
       setNotification(`Successfully Logged in!`);
+
       navigate("/");
     }
   };

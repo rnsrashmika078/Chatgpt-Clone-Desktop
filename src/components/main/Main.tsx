@@ -4,13 +4,9 @@ import { motion } from "framer-motion";
 import ChatArea from "../chatarea/ChatArea";
 import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
-import Nav from "../Nav/Nav";
-import Footer from "../footer/Footer";
-import { supabase } from "@/supabase/Supabase";
-import { AuthUser } from "@/types/type";
+import Nav from "../nav/Nav";
 
 const Main = () => {
-  const setAuthUser = useChatClone((store) => store.setAuthUser);
   const authUser = useChatClone((store) => store.authUser);
   const height = useChatClone((store) => store.height);
 
@@ -38,26 +34,10 @@ const Main = () => {
     }
   }, [isMobile]);
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user) {
-        const user: AuthUser = {
-          email: data?.user.email ?? "",
-          name: "",
-          id: Math.random(),
-          token: "",
-          authenticated: data?.user.aud,
-        };
-        setAuthUser(user);
-      }
-    };
-    getUser();
-  }, []);
-
   const [isToggle, setIsToggle] = useState<boolean>(true);
-  const toggleSidebar = () => {
-    setIsToggle((prev) => !prev);
+  const toggleSidebar = (state?: boolean) => {
+    if (state !== undefined) setIsToggle(state);
+    else setIsToggle((prev) => !prev);
   };
 
   return (
@@ -66,35 +46,27 @@ const Main = () => {
       // style={{ height: `${height}px` }}
     >
       <div className="flex w-full h-full ">
-        {authUser?.authenticated && (
-        
-          <Sidebar toggleSidebar={toggleSidebar} isToggle={isToggle} />
-        )}
+        <div>
+          {authUser?.authenticated && (
+            <Sidebar toggleSidebar={toggleSidebar} isToggle={isToggle} />
+          )}
+        </div>
+
         <div className=" flex  flex-col w-full justify-start items-center h-full">
           <div className=" flex flex-col w-full justify-start items-center h-[60px] ">
             <Nav toggleSidebar={toggleSidebar} isToggle={isToggle} />
           </div>
           <div
-            className="flex z-[9999] flex-col w-full justify-start items-center custom-scrollbar overflow-x-hidden h-full"
-            // style={{ height: height - 200 }}
+            className="flex z-20 flex-col w-full justify-start items-center custom-scrollbar overflow-x-hidden "
+            style={{ height: height - 50 }}
           >
             <ChatArea />
-            {/* <motion.div
-              className="fixed w-full"
-              animate={{
-                y:
-                  userMessages && userMessages.length > 0
-                    ? `${height < 610 ? "70%" : "100%"}`
-                    : `${height < 610 ? "78%" : "-20%"}`,
-              }}
-              transition={{ duration:  userMessages && userMessages.length > 2 ?  0: 0.6, ease: "easeInOut" }}
-            >
-              <AskAI />
-            </motion.div> */}
+
+            <motion.div className="relative w-full mt-14 z-50">
+              <AskAI toggleSidebar={toggleSidebar} />
+            </motion.div>
           </div>
-          <motion.div className="w-full mt-14 z-[10001]">
-            <AskAI />
-          </motion.div>
+
           {/* <div className=" flex flex-col w-full justify-start items-center ">
             <Footer />
           </div> */}
@@ -105,3 +77,17 @@ const Main = () => {
 };
 
 export default Main;
+{
+  /* <motion.div
+              className="fixed w-full"
+              animate={{
+                y:
+                  userMessages && userMessages.length > 0
+                    ? `${height < 610 ? "70%" : "100%"}`
+                    : `${height < 610 ? "78%" : "-20%"}`,
+              }}
+              transition={{ duration:  userMessages && userMessages.length > 2 ?  0: 0.6, ease: "easeInOut" }}
+            >
+              <AskAI />
+            </motion.div> */
+}

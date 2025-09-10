@@ -2,21 +2,22 @@ import { useEffect, useRef, useState } from "react";
 import { BsPlus } from "react-icons/bs";
 import { MdRecordVoiceOver } from "react-icons/md";
 import { FaArrowUp } from "react-icons/fa6";
-import ToolTip from "../common/ToolTip";
 import { useChatClone } from "@/zustand/store";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/supabase/Supabase";
 import { UserMessage } from "@/types/type";
-import { useNavigate } from "react-router-dom";
 
-const AskAI = () => {
-  type HoverItem = {
-    name: string;
-    isHover: boolean;
-  };
+interface ASKAI {
+  toggleSidebar: (state?: boolean) => void;
+}
+const AskAI = ({ toggleSidebar }: ASKAI) => {
+  // type HoverItem = {
+  //   name: string;
+  //   isHover: boolean;
+  // };
   //states
   const [searchText, setSearchText] = useState<string>("");
-  const [hoverItem, setHoverItem] = useState<HoverItem | null>(null);
+  // const [hoverItem, setHoverItem] = useState<HoverItem | null>(null);
   const [chatTitle, setChatTitle] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -78,11 +79,8 @@ const AskAI = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
-    // const modifiedPrompt = `${prompt} | NOTE:give Title and wrap in ** ( title only - unique ) and reply. title must be and unique short. and this the chat history: ${JSON.stringify(
-    //   userMessages
-    // )}`;
 
-    const username = authUser?.email ?? "User";
+    const username = authUser?.fname ?? "User";
     console.log(username);
 
     const historyText =
@@ -93,24 +91,35 @@ const AskAI = () => {
         : "No previous messages.";
 
     const modifiedPrompt = `
-    You are OzoneGPT, an AI assistant in a chat application.  
-    Your tasks:  
-    1. Always generate a **short, unique, and descriptive title** for the chat and wrap it in ** (example: **Shopping Tips**).  
-    2. Start the conversation by addressing the user by their name:  ("${username}").  
-    3. Provide your response to the latest user query.  
-    4. Keep the conversation consistent with the previous chat history.  
-    
-    Chat History so far:  
-    ${historyText}  
-    
-    Now, here is the new user message you must reply to:  
-    "${prompt}"
-    `;
+        You are OzoneGPT, an AI assistant in a chat application.
+        Your tasks:
+        1. Always generate a *$$*short, unique, and descriptive title*$$* for the chat if this is the first message of the chat and wrap it in *$$* (example: *$$*Shopping Tips*$$*).
+        2. And if this is the first message don't mentioned about that like saying 'seems like we just start.instead do like 'hi how can i help you today' like this.
+        2. If this is the first message, start by addressing the user by their name ("${username}").
+        3. Only mention the user's name later if it makes sense in context. Do not start every reply with the name.
+        4. Provide your response to the latest user query.
+        5. Keep the conversation consistent with the previous chat history.
+        6. Use proper **formatting rules** when replying:
+           - Use "#" headers for **main topics** (escape like \\# if VS Code warns).
+           - Use "##" for **subtopics**.
+           - Highlight **keywords** in bold (wrap with \`**\` like **this**).
+           - Use bullet points "-" or numbered lists "1." where appropriate.
+           - For code or commands, wrap in triple backticks (\`\`\`) with the language tag (e.g. \`\`\`js).
+           - Use blockquote ">" when emphasizing notes or tips.
+           - For links, use the Markdown format "[link](URL)" to add hyperlinks.
+           - Keep responses clean, readable, and Markdown-friendly.
+        Chat History so far:
+        If from chat history '${prompt}' isn't the first message of the chat, then ignore instruction 1.
+        ${historyText}
+        Now, here is the new user message you must reply to:
+        "${prompt}"
+        `;
 
     if (modifiedPrompt) {
       const askFromAI = async () => {
         const reply = await window.chatgpt.ask(modifiedPrompt); // get the ai response from the api
 
+        console.log("This is the reply ai gives", reply);
         // if errors show it in notifications
         if (reply.error) {
           setNotification(reply.message);
@@ -120,7 +129,7 @@ const AskAI = () => {
         if (!reply) return;
 
         const aiMessage = reply.message; // get the actual response from the response object
-        const rawMessage = aiMessage.split("**")[2] || ""; // this is the message that removed title -> this doesn't include the title
+        const rawMessage = aiMessage.split("*$$*")[2] || aiMessage; // this is the message that removed title -> this doesn't include the title
         if (!trackId && !activeChat?.chatId) {
           {
             /*This condition use to check whether the current chat or not 
@@ -130,7 +139,7 @@ const AskAI = () => {
                 -> Generate the title to the chat     */
           }
 
-          const title = aiMessage.split("**")[1] || "Chat"; // ai will generate title inside the astrix marks so grab that title
+          const title = aiMessage.split("*$$*")[1] || "Chat"; // ai will generate title inside the astrix marks so grab that title
           setChatTitle(title); // set chat title -> this state use for check the current chat has title so that until the next render cycle this stays as 'not new chat in next message'
           const chatData = { chatId: id, title: title };
           setChat(chatData);
@@ -200,39 +209,39 @@ const AskAI = () => {
   }, [activeChat?.chatId]);
 
   return (
-    <div className="w-1/2 mb-5 fixed left-1/2 bottom-0 -translate-x-1/2 ">
+    <div className="w-1/2 mb-5 absolute left-1/2 bottom-0 -translate-x-1/2 ">
       {/* // <div className=" mb-5 bottom-0 left-0 right-0 z-40 flex flex-col items-center w-full  pb-4"> */}
       {!(userMessages && userMessages.length > 0) && (
-        <h1 className="text-3xl font-bold font-story mb-4">OzoneGPT</h1>
+        <h1 className="flex justify-center items-center text-3xl font-bold font-story mb-4">
+          OzoneGPT
+        </h1>
       )}
-
       <div className="relative flex items-end w-full  bg-[#313131] rounded-2xl shadow-xl">
         {/* Add Button */}
         <div className="absolute bottom-2 left-2 flex items-center">
           <span
             className="cursor-pointer rounded-full p-1 hover:bg-[#444444] transition-all"
-            onMouseOver={() => setHoverItem({ name: "add", isHover: true })}
-            onMouseLeave={() => setHoverItem({ name: "add", isHover: false })}
+            // onMouseOver={() => setHoverItem({ name: "add", isHover: true })}
+            // onMouseLeave={() => setHoverItem({ name: "add", isHover: false })}
           >
             <BsPlus color="white" size={28} />
           </span>
-          {hoverItem?.name === "add" && hoverItem.isHover && (
-            <span className="absolute top-10  left-0">
+          {/* {hoverItem?.name === "add" && hoverItem.isHover && (
+            <span className="relative top-0 left-0">
               <ToolTip tip={"Add photos and more"} />
             </span>
-          )}
+          )} */}
         </div>
-
         {/* Textarea */}
         <textarea
           ref={textareaRef}
           value={searchText}
           rows={1}
+          onClick={() => toggleSidebar(false)}
           placeholder="Send a message..."
           onChange={(e) => handleSearch(e.target.value)}
           className="resize-none custom-scrollbar bg-transparent w-full text-white placeholder:text-[#b3b1b1] px-10 py-3 pr-12 rounded-2xl focus:outline-none"
         />
-
         {/* Send / Voice */}
         {searchText ? (
           <span
@@ -242,18 +251,18 @@ const AskAI = () => {
             <FaArrowUp color="black" size={18} strokeWidth={0.5} />
           </span>
         ) : (
-          <span
-            className=" absolute bottom-2 right-2 cursor-pointer p-2 rounded-full hover:bg-[#444444] transition-all"
-            onMouseOver={() => setHoverItem({ name: "voice", isHover: true })}
-            onMouseLeave={() => setHoverItem({ name: "voice", isHover: false })}
+          <div
+            className="absolute bottom-2 right-2 cursor-pointer p-2 rounded-full hover:bg-[#444444] transition-all"
+            // onMouseOver={() => setHoverItem({ name: "voice", isHover: true })}
+            // onMouseLeave={() => setHoverItem({ name: "voice", isHover: false })}
           >
             <MdRecordVoiceOver color="white" size={20} />
-            {hoverItem?.name === "voice" && hoverItem.isHover && (
-              <span className="absolute top-10 right-0">
+            {/* {hoverItem?.name === "voice" && hoverItem.isHover && (
+              <span className=" relative top-0 right-12">
                 <ToolTip tip={"Use voice mode"} />
               </span>
-            )}
-          </span>
+            )} */}
+          </div>
         )}
       </div>
     </div>

@@ -9,10 +9,10 @@ import { PiChatCircleSlash } from "react-icons/pi";
 import ToolTip from "../common/ToolTip";
 import { MdOutlineToggleOff } from "react-icons/md";
 interface Props {
-  toggleSidebar: () => void;
-  isToggle: boolean;
+  toggleSidebar?: (state?: boolean) => void;
+  isToggle?: boolean;
 }
-export default function Nav({ toggleSidebar, isToggle }: Props) {
+export default function Nav({ toggleSidebar }: Props) {
   const userMessages = useChatClone((store) => store.userMessages);
   const authUser = useChatClone((store) => store.authUser);
   const [visible, setVisible] = useState<boolean>(false);
@@ -35,7 +35,10 @@ export default function Nav({ toggleSidebar, isToggle }: Props) {
               onClick={() => navigate("/")}
             />
           )}
-          <span className="block mx-2 md:hidden" onClick={() => toggleSidebar()}>
+          <span
+            className="block mx-2 md:hidden"
+            onClick={() =>toggleSidebar?.()}
+          >
             <MdOutlineToggleOff />
           </span>
           {userMessages && userMessages.length > 0 && (

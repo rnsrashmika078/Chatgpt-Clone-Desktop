@@ -5,7 +5,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 // @ts-expect-error:import path error
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import CopyToClipboard from "../common/CopyToClipboard";
-
+import ReactMarkdown from "react-markdown";
 const ChatArea = () => {
   type Lang = "javascript" | "java" | "c++" | "c" | "jsx" | "python";
   const supportedLanguages: Lang[] = [
@@ -16,6 +16,7 @@ const ChatArea = () => {
     "python",
     "jsx",
   ];
+
   function detectLanguage(message: string): Lang | null {
     const lowerMsg = message.toLowerCase();
     for (const lang of supportedLanguages) {
@@ -60,28 +61,28 @@ const ChatArea = () => {
     }
   }, [userMessages]);
 
+
+  
   return (
     <div
-      className="z-[9998] relative w-full px-10 h-full overflow-x-hidden"
+      className="z-20 relative w-full px-10 h-full overflow-x-hidden p-10"
       ref={chatContainerRef}
     >
       {/* <UpdateButton /> */}
-
       {userMessages &&
         userMessages?.map((msg, index) => (
           // @ts-ignore
           <div key={index} className="w-full">
             <div className={`p-4 w-full flex justify-end items-end`}>
               {/* // 🟢 USER MESSAGE */}
-              <div className="relative">
+              <div className="relative w-fit p-5">
                 <pre className="relative font-custom shadow-md bg-[#3e3e3e] rounded-xl px-2 py-2 max-w-full overflow-x-auto">
                   {msg.user}
                 </pre>
-
                 <CopyToClipboard handleCopy={handleCopy} text={msg.user} />
               </div>
             </div>
-            <div className="justify-start w-full ">
+            <div className="justify-start w-11/12 ">
               {msg.ai === "loading" ? (
                 // 🟡 LOADING DOT
                 <div className="relative font-custom">
@@ -92,17 +93,11 @@ const ChatArea = () => {
                 <div className="relative font-custom w-full">
                   {msg.ai && msg.ai.split("```")[1] && (
                     <>
-                      <p className="relative font-custom px-2 py-2  w-full">
-                        {msg.ai && msg.ai.split("```")[0]}
-                        {/* {msg.ai !== "loading" && (
-                          <CopyToClipboard
-                        className="flex"
-                            handleCopy={handleCopy}
-                            text={msg.ai}
-                          />
-                        )} */}
-                        ITS PRINT FROM THERE
-                      </p>
+                      <div className="whitespace-pre-wrap break-words">
+                        <ReactMarkdown>
+                          {msg.ai.split("```")[0] ?? msg.ai}
+                        </ReactMarkdown>
+                      </div>
                       <div>
                         <SyntaxHighlighter
                           language={detectLanguage(msg.ai)}
@@ -111,46 +106,37 @@ const ChatArea = () => {
                             borderRadius: "0.75rem",
                             padding: "1rem",
                             fontSize: "0.9rem",
-                            maxWidth: "100%", // keep inside container
+                            maxWidth: "100%",
                             overflowX: "auto",
-                            // enable horizontal scroll
                           }}
-                          wrapLongLines={true} // break super long lines
+                          wrapLongLines={true}
                         >
                           {msg.ai && msg.ai.split("```")[1]}
                         </SyntaxHighlighter>
+                        <CopyToClipboard
+                          handleCopy={handleCopy}
+                          className="ml-2 top-16 right-2"
+                          right={0}
+                          text={msg.ai && msg.ai.split("```")[1]}
+                        />
                       </div>
 
-                      <CopyToClipboard
-                        handleCopy={handleCopy}
-                        text={msg.ai}
-                        right={0}
-                      />
-
-                      <p className="relative font-custom px-2 py-2  w-full">
-                        {msg.ai && msg.ai.split("```")[2]}
-                        {/* {msg.ai !== "loading" && (
-                          <CopyToClipboard
-                            handleCopy={handleCopy}
-                            text={msg.ai}
-                          />
-                        )} */}
-                        ITS PRINT FROM THERE
-                      </p>
+                      <div className="whitespace-pre-wrap break-words">
+                        <ReactMarkdown>
+                          {msg.ai.split("```")[2] ?? msg.ai}
+                        </ReactMarkdown>
+                      </div>
                     </>
                   )}
                   {!msg.ai?.includes("```") && (
-                    <p className="relative font-custom px-2 py-2  w-full">
-                      {msg.ai}
-                      {msg.ai !== "loading" && (
-                        <CopyToClipboard
-                          handleCopy={handleCopy}
-                          className="ml-2"
-                          text={msg.ai}
-                        />
-                      )}
-                      ITS PRINT FROM THERE
-                    </p>
+                    <div className="whitespace-pre-wrap break-words">
+                      <ReactMarkdown>{msg.ai}</ReactMarkdown>
+                      <CopyToClipboard
+                        handleCopy={handleCopy}
+                        text={msg.ai}
+                        left={0}
+                      />
+                    </div>
                   )}
                 </div>
               )}

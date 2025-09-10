@@ -3,11 +3,12 @@
 	"private": true,
 	"version": "1.0.0",
 	"type": "module",
-	"author": "Rashmika Siriwardhana",  "description": "ChatGPT clone desktop app",
+	"author": "Rashmika Siriwardhana",
+	"description": "ChatGPT clone desktop app",
 	"repository": {
-    "type": "git",
-    "url": "https://github.com/rnsrashmika078/Chatgpt-Clone-Desktop.git"
-  },
+		"type": "git",
+		"url": "https://github.com/rnsrashmika078/Chatgpt-Clone-Desktop.git"
+	},
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build && electron-builder",
@@ -33,6 +34,7 @@
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-icons": "^5.5.0",
+		"react-markdown": "^10.1.0",
 		"react-router-dom": "^7.7.1",
 		"react-syntax-highlighter": "^15.6.6",
 		"tailwind-merge": "^2.5.2",
@@ -70,9 +72,9 @@
 		],
 		"publish": [
 			{
-			  "provider": "github",
-			  "owner": "rnsrashmika078",
-			  "repo": "Chatgpt-Clone-Desktop"
+				"provider": "github",
+				"owner": "rnsrashmika078",
+				"repo": "Chatgpt-Clone-Desktop"
 			}
 		],
 		"asar": true,

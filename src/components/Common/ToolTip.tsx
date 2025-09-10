@@ -5,7 +5,7 @@ interface Props {
 }
 const ToolTip = ({ tip, children }: Props) => {
   return (
-    <div className="text-xs font-custom bg-black p-1 rounded-xl px-3">
+    <div className="w-full text-xs font-custom bg-black p-1 rounded-xl px-3">
       {tip}
       {children}
     </div>

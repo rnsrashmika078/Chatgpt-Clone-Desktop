@@ -39,7 +39,7 @@ const Sonner = () => {
             <>
               <div className="flex justify-between items-center">
                 <div className="text-[#d0d0d0] ">
-                  <h1>{notification.split(".")[0]}</h1>
+                  <p>{notification.split(".")[0]}</p>
                   <span className="">
                     {notification.split(".")[1]}
                   </span>

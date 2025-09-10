@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { GrCloudlinux, GrGallery } from "react-icons/gr";
 import Profile from "@/assets/electron-logo.svg";
-import { BiDockLeft, BiEdit, BiSearch } from "react-icons/bi";
+import { BiDockLeft, BiEdit, BiLogOut, BiSearch } from "react-icons/bi";
 import { useChatClone } from "@/zustand/store";
 import { supabase } from "@/supabase/Supabase";
 import { UpdateChat } from "@/types/type";
 import { MdDelete } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+import { BsGear } from "react-icons/bs";
 
 interface Props {
   toggleSidebar: () => void;
@@ -18,6 +20,7 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
   const updateChats = useChatClone((store) => store.updateChats);
   const deleteChat = useChatClone((store) => store.deleteChat);
   const setUserMessages = useChatClone((store) => store.setUserMessages);
+  const setAuthUser = useChatClone((store) => store.setAuthUser);
   const chats = useChatClone((store) => store.chats);
   const setTrackId = useChatClone((store) => store.setTrackId);
 
@@ -41,12 +44,14 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
   ];
 
   const [hover, setHover] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAllChats = async () => {
       const { data, error } = await supabase
         .from("chats")
-        .select("chatId,title");
+        .select("chatId,title")
+        .eq("user_id", authUser?.id);
 
       const chats = data as UpdateChat[];
       updateChats(chats);
@@ -59,6 +64,17 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
     };
     fetchAllChats();
   }, []);
+
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Logout error:", error.message);
+    } else {
+      console.log("Logged out successfully");
+      setAuthUser(null);
+      navigate("/login");
+    }
+  };
 
   const handleDeleteChat = async (chatId: string) => {
     const { error } = await supabase
@@ -90,8 +106,8 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
 
   const style = `px-2 text-sm custom-scrollbar bg-[#161515] flex flex-col justify-between z-[10000]  transition-all ${
     isToggle
-      ? "w-[350px] fixed md:relative"
-      : "w-[0] fixed md:relative md:w-[60px]"
+      ? "w-[350px] opacity-100 fixed md:relative"
+      : "w-0 opacity-0  fixed md:relative md:opacity-100 md:w-[56px]"
   } h-full border-r border-[#3d3d3d] overflow-x-hidden`;
 
   return (
@@ -144,12 +160,13 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
             <div
               // @ts-expect-error: key not identified
               key={index}
-              className="cursor-pointer transition-all flex justify-start items-center hover:bg-[#444444] rounded-md px-0.5"
+              className="rounded-xl  cursor-pointer transition-all flex justify-start items-center hover:bg-[#444444]  px-0.5"
               onClick={() => {
                 if (item.name === "New chat") {
                   setTrackId(null);
                   setActiveChat(null);
                   setUserMessages(null);
+                  toggleSidebar();
                 }
               }}
             >
@@ -170,13 +187,13 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
           ))}
         </div>
 
-        <h1
+        <p
           className={` px-2  ${
             isToggle ? "opacity-100 " : "opacity-0 w-0 ml-0"
-          } text-[#6c6c6c] mt-5`}
+          } text-[#6c6c6c] mt-4`}
         >
           Chats
-        </h1>
+        </p>
 
         {isToggle &&
           chats &&
@@ -190,9 +207,9 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
               }}
               className={`text-xs flex justify-between my-1 ${
                 activeChat?.chatId === item.chatId ? "bg-[#444444]" : ""
-              } px-2 hover:bg-[#444444] rounded-md  cursor-pointer flex justify-start items-center gap-2 py-1`}
+              } px-2 hover:bg-[#444444] rounded-xl  cursor-pointer flex justify-start items-center gap-2 py-1`}
             >
-              <p className="w-36 truncate">{item.title}</p>
+              <p >{item.title}</p>
               <span
                 onClick={(e) => {
                   e.stopPropagation();
@@ -209,8 +226,9 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
             </div>
           ))}
       </div>
-      <div className="flex border-t border-[#393939]  flex-row gap-2  sticky bottom-0 ">
-        <div className="flex gap-2 justify-center items-center hover:bg-[#444444] shadow-md px-2 py-2 ">
+      <div className="flex flex-col border-t border-[#393939] gap-2 py-1 mb-2 sticky bottom-0 ">
+        {/* for user profile summary */}
+        <div className="flex gap-2 justify-start items-center hover:bg-[#444444] rounded-xl  px-2 py-1  w-full">
           <img
             src={Profile}
             className="flex flex-col w-6 h-6 flex-shrink-0"
@@ -218,13 +236,58 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
           {isToggle && (
             <div className="">
               <p
-                className={`w-5 lg:w-full truncate transition-all duration-300 overflow-hidden ${
-                  isToggle ? "opacity-100 " : "opacity-0 w-0 ml-0"
+                className={`  transition-all duration-300 overflow-hidden ${
+                  isToggle ? "w-full opacity-100 " : "w-full opacity-0  ml-0"
                 }`}
               >
-                {authUser && authUser.email}
+                {authUser && authUser.fname + " " + authUser.lname}
               </p>
-              <p>Free</p>
+              <p
+                className={` text-[#a5a5a5]   transition-all duration-300 overflow-hidden ${
+                  isToggle ? "opacity-100 w-full " : "w-full opacity-0  ml-0"
+                }`}
+              >
+                You
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* for settings  */}
+        <div className="flex gap-2 justify-start items-center hover:bg-[#444444] rounded-xl  px-2 py-1  w-full">
+          <div className="">
+            <BsGear size={20} />
+          </div>
+          {isToggle && (
+            <div className="">
+              <p
+                className={`  transition-all duration-300 overflow-hidden ${
+                  isToggle ? "w-full opacity-100 " : "w-full opacity-0  ml-0"
+                }`}
+              >
+                Settings
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* for logged out */}
+        <div
+          className="flex gap-2 justify-start items-center hover:bg-[#444444] rounded-xl px-2 py-1  w-full"
+          onClick={() => logout()}
+        >
+          <div className="">
+            <BiLogOut size={20} />
+          </div>
+          {isToggle && (
+            <div className="">
+              <p
+                className={`  transition-all duration-300 overflow-hidden ${
+                  isToggle ? "w-full opacity-100 " : "w-full opacity-0  ml-0"
+                }`}
+              >
+                Logout
+              </p>
             </div>
           )}
         </div>
