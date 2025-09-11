@@ -32,6 +32,10 @@ contextBridge.exposeInMainWorld("auth", {
   getAuthUser: () => ipcRenderer.invoke("get-auth-user"),
 });
 
+contextBridge.exposeInMainWorld("electronAPI", {
+  initializeLLM: () => ipcRenderer.invoke("run-ollama"),
+});
+
 contextBridge.exposeInMainWorld("updater", {
   // Trigger update check
   checkForUpdate: () => ipcRenderer.send("check_for_update"),

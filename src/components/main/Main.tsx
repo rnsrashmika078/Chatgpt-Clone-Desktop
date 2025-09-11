@@ -8,6 +8,7 @@ import Nav from "../nav/Nav";
 
 const Main = () => {
   const authUser = useChatClone((store) => store.authUser);
+  const setNotification = useChatClone((store) => store.setNotification);
   const height = useChatClone((store) => store.height);
 
   // use color
@@ -39,6 +40,18 @@ const Main = () => {
     if (state !== undefined) setIsToggle(state);
     else setIsToggle((prev) => !prev);
   };
+
+  const initializeLLM = async () => {
+    try {
+      const result = await window.electronAPI.initializeLLM();
+      setNotification(result.toString());
+    } catch (err) {
+      // setNotification(err instanceof Error ? err.message : "");
+    }
+  };
+  useEffect(() => {
+    initializeLLM();
+  }, []);
 
   return (
     <div

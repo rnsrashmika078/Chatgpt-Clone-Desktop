@@ -17,6 +17,7 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
   const authUser = useChatClone((store) => store.authUser);
   const activeChat = useChatClone((store) => store.activeChat);
   const setActiveChat = useChatClone((store) => store.setActiveChat);
+  const setNotification = useChatClone((store) => store.setNotification);
   const updateChats = useChatClone((store) => store.updateChats);
   const deleteChat = useChatClone((store) => store.deleteChat);
   const setUserMessages = useChatClone((store) => store.setUserMessages);
@@ -72,6 +73,7 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
     } else {
       console.log("Logged out successfully");
       setAuthUser(null);
+      setNotification(null);
       navigate("/login");
     }
   };
@@ -209,7 +211,7 @@ const Sidebar = ({ toggleSidebar, isToggle }: Props) => {
                 activeChat?.chatId === item.chatId ? "bg-[#444444]" : ""
               } px-2 hover:bg-[#444444] rounded-xl  cursor-pointer flex justify-start items-center gap-2 py-1`}
             >
-              <p >{item.title}</p>
+              <p>{item.title}</p>
               <span
                 onClick={(e) => {
                   e.stopPropagation();

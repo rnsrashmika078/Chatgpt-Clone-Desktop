@@ -28,6 +28,9 @@ electron.contextBridge.exposeInMainWorld("auth", {
   setAuthUser: (authUser) => electron.ipcRenderer.send("save-auth-user", authUser),
   getAuthUser: () => electron.ipcRenderer.invoke("get-auth-user")
 });
+electron.contextBridge.exposeInMainWorld("electronAPI", {
+  initializeLLM: () => electron.ipcRenderer.invoke("run-ollama")
+});
 electron.contextBridge.exposeInMainWorld("updater", {
   // Trigger update check
   checkForUpdate: () => electron.ipcRenderer.send("check_for_update"),

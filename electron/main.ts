@@ -5,6 +5,7 @@ import { autoUpdater } from "electron-updater";
 import path from "node:path";
 import dotenv from "dotenv";
 import { UserPreference } from "./storage";
+import { exec } from "node:child_process";
 
 createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -108,7 +109,6 @@ ipcMain.handle("ask-chatgpt", async (_event, prompt) => {
     }
 
     const text = data.response;
-    console.log("TEXT REPLY", text);
     return { error: false, message: text || "No reply received" };
   } catch (error) {
     return {
@@ -119,6 +119,16 @@ ipcMain.handle("ask-chatgpt", async (_event, prompt) => {
   }
 });
 
+//ipc function for run the llm
+
+ipcMain.handle("run-ollama", async () => {
+  return new Promise((resolve, reject) => {
+    exec("C:\\Users\\Rashm\\OneDrive\\Desktop\\initLLM.bat", (err, stdout, _stderr) => {
+      if (err) return reject(err.message);
+      resolve(stdout || "Script executed.");
+    });
+  });
+});
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();

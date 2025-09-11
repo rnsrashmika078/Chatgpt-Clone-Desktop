@@ -6,6 +6,7 @@ declare global {
   interface Window {
     electronAPI: {
       getMetadata: (filePath: string) => Promise<any>;
+      initializeLLM: () => Promise<String>;
     };
     chatgpt: {
       ask: (prompt: string) => Promise<Reply>;

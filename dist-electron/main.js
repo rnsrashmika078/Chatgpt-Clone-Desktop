@@ -34,6 +34,7 @@ import fs$1 from "node:fs";
 import crypto from "node:crypto";
 import assert from "node:assert";
 import os from "node:os";
+import { exec } from "node:child_process";
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
@@ -29166,7 +29167,6 @@ ipcMain$1.handle("ask-chatgpt", async (_event, prompt) => {
       };
     }
     const text = data.response;
-    console.log("TEXT REPLY", text);
     return { error: false, message: text || "No reply received" };
   } catch (error2) {
     return {
@@ -29174,6 +29174,14 @@ ipcMain$1.handle("ask-chatgpt", async (_event, prompt) => {
       message: error2 instanceof Error ? error2.message : "Unknown error occurred"
     };
   }
+});
+ipcMain$1.handle("run-ollama", async () => {
+  return new Promise((resolve2, reject) => {
+    exec("C:\\Users\\Rashm\\OneDrive\\Desktop\\initLLM.bat", (err, stdout, _stderr) => {
+      if (err) return reject(err.message);
+      resolve2(stdout || "Script executed.");
+    });
+  });
 });
 app$1.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
